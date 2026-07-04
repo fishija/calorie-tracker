@@ -1,13 +1,13 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, render_template
 
-main = Blueprint("main", __name__)
+main_bp = Blueprint("main", __name__)
 
 
-@main.route("/")
+@main_bp.route("/")
 def index():
-    return jsonify({"message": "hello world"})
+    return render_template("index.html")
 
 
-@main.route("/health")
+@main_bp.route("/health")
 def health():
     return jsonify({"status": "ok"})
