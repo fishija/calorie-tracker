@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Home — Calorie Tracker{% endblock %}
+
+{% block content %}
+{% if current_user.is_authenticated %}
+  <div class="card">
+    <h1>Welcome back, {{ current_user.username }} 👋</h1>
+    <p>This is a placeholder for today's log. Wire up your real dashboard here —
+       entries, calorie totals, goal progress, etc.</p>
+    <p class="form-footer">
+      Signed in as {{ current_user.email }} ·
+      <a href="{{ url_for('auth.logout') }}">Log out</a>
+    </p>
+  </div>
+{% else %}
+  <div class="card">
+    <h1>Track your meals, know your numbers</h1>
+    <p>A simple calorie tracker with photo logging and LLM-based entry review.</p>
+    <p>
+      <a class="btn" href="{{ url_for('auth.register') }}">Get started</a>
+      &nbsp;
+      <a href="{{ url_for('auth.login') }}">Log in</a>
+    </p>
+  </div>
+{% endif %}
+{% endblock %}

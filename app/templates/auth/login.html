@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Log in — Calorie Tracker{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h1>Log in</h1>
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+
+    {{ form.email_or_username.label }}
+    {{ form.email_or_username(placeholder="you@example.com or username", autofocus=true) }}
+    {% for error in form.email_or_username.errors %}
+      <div class="field-error">{{ error }}</div>
+    {% endfor %}
+
+    {{ form.password.label }}
+    {{ form.password(placeholder="••••••••") }}
+    {% for error in form.password.errors %}
+      <div class="field-error">{{ error }}</div>
+    {% endfor %}
+
+    <div class="checkbox-row">
+      {{ form.remember() }}
+      {{ form.remember.label }}
+    </div>
+
+    {{ form.submit() }}
+  </form>
+
+  <p class="form-footer">
+    Don't have an account? <a href="{{ url_for('auth.register') }}">Sign up</a>
+  </p>
+</div>
+{% endblock %}
