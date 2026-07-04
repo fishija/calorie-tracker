@@ -2,6 +2,7 @@ from flask import Flask
 from config import config
 from flask_login import LoginManager
 from app.db import db, init_db
+import random
 import os
 
 login_manager = LoginManager()
@@ -32,5 +33,9 @@ def create_app():
 
     from app.routes import main_bp
     app.register_blueprint(main_bp)
+
+    @app.context_processor
+    def inject_food_icon():
+        return dict(current_food_icon=random.choice(app.config["FOOD_ICONS"]))
 
     return app

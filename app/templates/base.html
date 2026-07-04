@@ -8,7 +8,7 @@
 </head>
 <body>
   <nav>
-    <a class="brand" href="{{ url_for('main.index') }}">🥗 Calorie Tracker</a>
+    <a class="brand" href="{{ url_for('main.index') }}">{{ current_food_icon }} Calorie Tracker</a>
     <div class="links">
       {% if current_user.is_authenticated %}
         <a href="{{ url_for('main.index') }}">Today</a>

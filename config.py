@@ -10,6 +10,17 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///app.db")
     UPLOAD_FOLDER = Path(__file__).parent / "uploads"
 
+    # Little fun stuff
+    FOOD_ICONS = [
+        "🍇","🍈","🍊","🍋","🍌","🍍","🥭","🍎","🍐","🍑","🍒",
+        "🍓","🫐","🍅","🫒","🥑","🍆","🥕","🌽","🌶️","🫑","🥒",
+        "🥦","🧄","🧅","🥜","🫚","🫛","🍞","🥐","🥨","🧇","🧀",
+        "🍗","🥩","🥓","🍔","🍟","🍕","🌭","🥪","🌮","🌯","🫔",
+        "🥗","🍿","🥫","🍝","🍱","🍙","🍜","🍣","🍤","🍥","🥮",
+        "🥟","🥠","🍦","🍩","🍪","🍰","🧁","🍫","🍬","🍭","🍵",
+        "🍾","🍷","🍹","🧋","🧃"
+    ]
+
 
 class DevelopmentConfig(Config):
     DEBUG = True
