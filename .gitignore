@@ -6,6 +6,10 @@ dist/
 wheels/
 *.egg-info
 
+# Migration/db files
+migrations/alembic.ini
+*.db
+
 # Virtual environments
 .venv
 venv

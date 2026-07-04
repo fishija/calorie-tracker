@@ -5,8 +5,14 @@ description = "LLM-powered calorie estimation and tracking application."
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "email-validator>=2.3.0",
     "flask>=3.1.3",
+    "flask-login>=0.6.3",
+    "flask-migrate>=4.1.0",
+    "flask-sqlalchemy>=3.1.1",
+    "flask-wtf>=1.3.0",
     "python-dotenv>=1.2.2",
+    "werkzeug>=3.1.8",
 ]
 
 [dependency-groups]
