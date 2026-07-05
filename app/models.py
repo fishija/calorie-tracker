@@ -34,3 +34,30 @@ class Goal(db.Model):
     carb_g = db.Column(db.Integer, nullable=False)
     fat_g = db.Column(db.Integer, nullable=False)
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+
+class Meal(db.Model):
+    __tablename__ = "meals"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    logged_date = db.Column(db.Date, nullable=False)
+    name = db.Column(db.String(255), nullable=False)
+    calorie_kcal = db.Column(db.Integer, nullable=False)
+    protein_g = db.Column(db.Integer, nullable=False)
+    carb_g = db.Column(db.Integer, nullable=False)
+    fat_g = db.Column(db.Integer, nullable=False)
+
+    description = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    photos = db.relationship("MealPhoto", backref="meal", cascade="all, delete-orphan")
+
+
+class MealPhoto(db.Model):
+    __tablename__ = "meal_photos"
+
+    id = db.Column(db.Integer, primary_key=True)
+    meal_id = db.Column(db.Integer, db.ForeignKey("meals.id"), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    uploaded_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
