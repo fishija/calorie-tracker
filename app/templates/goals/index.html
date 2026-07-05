@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+  <h1 class="h3 mb-4">Daily goals</h1>
+
+  <div class="card mb-5">
+    <div class="card-body">
+      <h2 class="h5 card-title">
+        {% if todays_goal %}Update today's goal{% else %}Set today's goal{% endif %}
+      </h2>
+      <p class="text-muted small">
+        This is effective from today onward. It won't change how past days are shown --
+        each past day keeps the goal that was active on it at the time.
+      </p>
+
+      <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="row g-3">
+          <div class="col-6 col-md-3">
+            <label class="form-label" for="{{ form.calorie_kcal.id }}">{{ form.calorie_kcal.label.text }}</label>
+            {{ form.calorie_kcal(class="form-control" + (" is-invalid" if form.calorie_kcal.errors else "")) }}
+            {% for error in form.calorie_kcal.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-6 col-md-3">
+            <label class="form-label" for="{{ form.protein_g.id }}">{{ form.protein_g.label.text }}</label>
+            {{ form.protein_g(class="form-control" + (" is-invalid" if form.protein_g.errors else "")) }}
+            {% for error in form.protein_g.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-6 col-md-3">
+            <label class="form-label" for="{{ form.carb_g.id }}">{{ form.carb_g.label.text }}</label>
+            {{ form.carb_g(class="form-control" + (" is-invalid" if form.carb_g.errors else "")) }}
+            {% for error in form.carb_g.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-6 col-md-3">
+            <label class="form-label" for="{{ form.fat_g.id }}">{{ form.fat_g.label.text }}</label>
+            {{ form.fat_g(class="form-control" + (" is-invalid" if form.fat_g.errors else "")) }}
+            {% for error in form.fat_g.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">
+          {% if todays_goal %}Update today's goal{% else %}Set goal{% endif %}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <h2 class="h5 mb-3">Goal history</h2>
+
+  {% if history %}
+    <div class="table-responsive">
+      <table class="table table-sm align-middle">
+        <thead>
+          <tr>
+            <th>Effective date</th>
+            <th>Kcal</th>
+            <th>P</th>
+            <th>C</th>
+            <th>F</th>
+            <th>Last updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for goal in history %}
+            <tr {% if todays_goal and goal.id == todays_goal.id %}class="table-primary"{% endif %}>
+              <td>{{ goal.effective_date.strftime("%Y-%m-%d") }}</td>
+              <td>{{ goal.calorie_kcal }}</td>
+              <td>{{ goal.protein_g }}</td>
+              <td>{{ goal.carb_g }}</td>
+              <td>{{ goal.fat_g }}</td>
+              <td>{{ goal.updated_at.strftime("%Y-%m-%d %H:%M") }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="text-muted">No goals set yet.</p>
+  {% endif %}
+</div>
+{% endblock %}
