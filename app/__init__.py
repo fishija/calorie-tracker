@@ -34,6 +34,9 @@ def create_app():
     from app.routes import main_bp
     app.register_blueprint(main_bp)
 
+    from app.goals.routes import goals_bp
+    app.register_blueprint(goals_bp, url_prefix="/goals")
+
     @app.context_processor
     def inject_food_icon():
         return dict(current_food_icon=random.choice(app.config["FOOD_ICONS"]))
