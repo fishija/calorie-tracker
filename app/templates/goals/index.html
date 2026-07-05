@@ -17,8 +17,14 @@
       <form method="post" novalidate>
         {{ form.hidden_tag() }}
 
-        <div class="row g-3">
-          <div class="col-6 col-md-3">
+        <div class="goal-fields"
+             id="goal-fields"
+             data-calorie-id="{{ form.calorie_kcal.id }}"
+             data-protein-id="{{ form.protein_g.id }}"
+             data-carb-id="{{ form.carb_g.id }}"
+             data-fat-id="{{ form.fat_g.id }}">
+
+          <div class="mb-3">
             <label class="form-label" for="{{ form.calorie_kcal.id }}">{{ form.calorie_kcal.label.text }}</label>
             {{ form.calorie_kcal(class="form-control" + (" is-invalid" if form.calorie_kcal.errors else "")) }}
             {% for error in form.calorie_kcal.errors %}
@@ -26,34 +32,49 @@
             {% endfor %}
           </div>
 
-          <div class="col-6 col-md-3">
+          <div class="mb-3">
             <label class="form-label" for="{{ form.protein_g.id }}">{{ form.protein_g.label.text }}</label>
-            {{ form.protein_g(class="form-control" + (" is-invalid" if form.protein_g.errors else "")) }}
+            <div class="input-group goal-percent-group">
+              {{ form.protein_g(class="form-control" + (" is-invalid" if form.protein_g.errors else "")) }}
+              <input type="text" class="form-control goal-percent-input" id="protein_pct" readonly tabindex="-1" aria-label="Protein % of calories">
+            </div>
             {% for error in form.protein_g.errors %}
               <div class="field-error">{{ error }}</div>
             {% endfor %}
           </div>
 
-          <div class="col-6 col-md-3">
+          <div class="mb-3">
             <label class="form-label" for="{{ form.carb_g.id }}">{{ form.carb_g.label.text }}</label>
-            {{ form.carb_g(class="form-control" + (" is-invalid" if form.carb_g.errors else "")) }}
+            <div class="input-group goal-percent-group">
+              {{ form.carb_g(class="form-control" + (" is-invalid" if form.carb_g.errors else "")) }}
+              <input type="text" class="form-control goal-percent-input" id="carb_pct" readonly tabindex="-1" aria-label="Carb % of calories">
+            </div>
             {% for error in form.carb_g.errors %}
               <div class="field-error">{{ error }}</div>
             {% endfor %}
           </div>
 
-          <div class="col-6 col-md-3">
+          <div class="mb-3">
             <label class="form-label" for="{{ form.fat_g.id }}">{{ form.fat_g.label.text }}</label>
-            {{ form.fat_g(class="form-control" + (" is-invalid" if form.fat_g.errors else "")) }}
+            <div class="input-group goal-percent-group">
+              {{ form.fat_g(class="form-control" + (" is-invalid" if form.fat_g.errors else "")) }}
+              <input type="text" class="form-control goal-percent-input" id="fat_pct" readonly tabindex="-1" aria-label="Fat % of calories">
+            </div>
             {% for error in form.fat_g.errors %}
               <div class="field-error">{{ error }}</div>
             {% endfor %}
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary mt-3">
-          {% if todays_goal %}Update today's goal{% else %}Set goal{% endif %}
-        </button>
+        <div class="goal-submit-row">
+          <button type="submit" class="btn btn-primary">
+            {% if todays_goal %}Update today's goal{% else %}Set goal{% endif %}
+          </button>
+          <div class="goal-total-field">
+            <label for="total_pct">Total</label>
+            <input type="text" class="goal-percent-input goal-total-input--empty" id="total_pct" readonly tabindex="-1" aria-label="Total % of calories">
+          </div>
+        </div>
       </form>
     </div>
   </div>
@@ -70,18 +91,16 @@
             <th>P</th>
             <th>C</th>
             <th>F</th>
-            <th>Last updated</th>
           </tr>
         </thead>
         <tbody>
           {% for goal in history %}
-            <tr {% if todays_goal and goal.id == todays_goal.id %}class="table-primary"{% endif %}>
+            <tr {% if todays_goal and goal.id == todays_goal.id %}class="goal-history-current"{% endif %}>
               <td>{{ goal.effective_date.strftime("%Y-%m-%d") }}</td>
               <td>{{ goal.calorie_kcal }}</td>
               <td>{{ goal.protein_g }}</td>
               <td>{{ goal.carb_g }}</td>
               <td>{{ goal.fat_g }}</td>
-              <td>{{ goal.updated_at.strftime("%Y-%m-%d %H:%M") }}</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -91,4 +110,6 @@
     <p class="text-muted">No goals set yet.</p>
   {% endif %}
 </div>
+
+<script src="{{ url_for('static', filename='js/goal_percentages.js') }}"></script>
 {% endblock %}
