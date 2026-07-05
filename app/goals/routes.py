@@ -6,31 +6,15 @@ from flask_login import login_required, current_user
 from app.db import db
 from app.models import Goal
 from app.goals.forms import GoalForm
+from app.goals.queries import get_todays_goal
 
 goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
-
-
-def _today_utc_range() -> tuple[datetime, datetime]:
-    start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-    end = start + timedelta(days=1)
-    return start, end
-
-
-def _get_todays_goal(user_id: int) -> Goal | None:
-    start, end = _today_utc_range()
-    return (
-        Goal.query.filter(
-            Goal.user_id == user_id,
-            Goal.effective_date >= start,
-            Goal.effective_date < end
-        ).first()
-    )
 
 
 @goals_bp.route("/", methods=["GET", "POST"])
 @login_required
 def index():
-    todays_goal = _get_todays_goal(user_id=current_user.id)
+    todays_goal = get_todays_goal(user_id=current_user.id)
     form = GoalForm()
 
     if form.validate_on_submit():
