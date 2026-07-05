@@ -112,6 +112,47 @@ button:hover, .btn:hover { background: var(--accent-hover); }
     font-size: 0.82rem;
     margin: -12px 0 12px;
 }
+.goal-percent-group {
+    flex-wrap: nowrap;
+}
+.goal-percent-input {
+    flex: 0 0 80px;
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+    padding-left: 6px;
+    padding-right: 6px;
+    text-align: center;
+}
+.goal-percent-addon {
+    flex: 0 0 auto;
+}
+.goal-fields {
+    display: block;
+}
+.goal-submit-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 1rem;
+}
+.goal-total-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+.goal-total-field input {
+    margin-bottom: 0;
+}
+.goal-total-input--empty { background: #e9ecef; }
+.goal-total-input--under  { background: #fff9c4; }
+.goal-total-input--exact  { background: #c8e6c9; }
+.goal-total-input--over   { background: #ffcdd2; }
+.goal-history-current {
+    background: #f3f2ef;
+}
 .form-footer {
     margin-top: 18px;
     font-size: 0.9rem;
