@@ -34,9 +34,9 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label" for="{{ form.photos.id }}">{{ form.photos.label.text }}</label>
-          {{ form.photos(class="form-control" + (" is-invalid" if form.photos.errors else "")) }}
-          {% for error in form.photos.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          <label class="form-label" for="{{ form.new_photos.id }}">{{ form.new_photos.label.text }}</label>
+          {{ form.new_photos(class="form-control" + (" is-invalid" if form.new_photos.errors else "")) }}
+          {% for error in form.new_photos.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
           <div class="form-text">Optional -- attach one or more photos of the meal.</div>
         </div>
 

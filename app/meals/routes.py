@@ -74,14 +74,13 @@ def add_meal(date_str):
         )
 
         # Handle photo uploads if any
-        if form.photos.data:
-            for photo in form.photos.data:
-                if photo:
-                    # Save the photo and create a MealPhoto instance
-                    filename = make_unique_filename(photo.filename)
-                    photo.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
-                    meal_photo = MealPhoto(meal=new_meal, filename=filename)
-                    db.session.add(meal_photo)
+        for photo in form.new_photos.data or []:
+            if photo:
+                # Save the photo and create a MealPhoto instance
+                filename = make_unique_filename(photo.filename)
+                photo.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+                meal_photo = MealPhoto(meal=new_meal, filename=filename)
+                db.session.add(meal_photo)
 
         db.session.add(new_meal)
         db.session.commit()

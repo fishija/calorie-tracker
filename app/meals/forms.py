@@ -12,7 +12,7 @@ class MealForm(FlaskForm):
     fat_g = IntegerField("Fats (g)", validators=[DataRequired()])
     
     description = TextAreaField("Description")
-    photos = MultipleFileField(
+    new_photos = MultipleFileField(
         "Meal Photos",
           validators=[FileAllowed(["jpg", "jpeg", "png"], "Images only")]
     )
