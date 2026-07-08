@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Edit meal — {{ selected_date.strftime("%Y-%m-%d") }}
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex align-items-center gap-2 mb-4">
+    <a class="btn btn-outline-secondary btn-sm"
+       href="{{ url_for('meals.day_view', date_str=selected_date.isoformat()) }}">&#9664; Back</a>
+    <h1 class="h5 mb-0">
+      Edit meal — {{ selected_date.strftime("%Y-%m-%d") }}
+    </h1>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+          <label class="form-label" for="{{ form.name.id }}">{{ form.name.label.text }}</label>
+          {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="e.g. Chicken salad") }}
+          {% for error in form.name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="{{ form.description.id }}">{{ form.description.label.text }}</label>
+          {{ form.description(class="form-control", rows=3, placeholder="e.g. Scrambled eggs with two slices of toast and butter") }}
+          <div class="form-text">Optional. Not used for anything yet -- kept for when photo/description-based estimation is added.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="{{ form.new_photos.id }}">{{ form.new_photos.label.text }}</label>
+          {{ form.new_photos(class="form-control" + (" is-invalid" if form.new_photos.errors else "")) }}
+          {% for error in form.new_photos.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          <div class="form-text">Optional -- attach one or more photos of the meal.</div>
+        </div>
+
+        <hr class="my-4">
+
+        <p class="text-muted small mb-2">Enter the calories and macros for this meal.</p>
+
+        <div class="row">
+          <div class="col-6 col-md-3 mb-3">
+            <label class="form-label" for="{{ form.calorie_kcal.id }}">{{ form.calorie_kcal.label.text }}</label>
+            {{ form.calorie_kcal(class="form-control" + (" is-invalid" if form.calorie_kcal.errors else "")) }}
+            {% for error in form.calorie_kcal.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-6 col-md-3 mb-3">
+            <label class="form-label" for="{{ form.protein_g.id }}">{{ form.protein_g.label.text }}</label>
+            {{ form.protein_g(class="form-control" + (" is-invalid" if form.protein_g.errors else "")) }}
+            {% for error in form.protein_g.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-6 col-md-3 mb-3">
+            <label class="form-label" for="{{ form.carb_g.id }}">{{ form.carb_g.label.text }}</label>
+            {{ form.carb_g(class="form-control" + (" is-invalid" if form.carb_g.errors else "")) }}
+            {% for error in form.carb_g.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-6 col-md-3 mb-3">
+            <label class="form-label" for="{{ form.fat_g.id }}">{{ form.fat_g.label.text }}</label>
+            {{ form.fat_g(class="form-control" + (" is-invalid" if form.fat_g.errors else "")) }}
+            {% for error in form.fat_g.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          </div>
+        </div>
+
+        {% if meal.photos %}
+          <div class="mb-3">
+            <label class="form-label">Existing photos</label>
+            <div class="d-flex flex-wrap gap-3">
+              {% for photo in meal.photos %}
+                <div class="text-center" style="width:96px;">
+                  <img src="{{ url_for('meals.uploaded_file', filename=photo.filename) }}"
+                       alt="Meal photo"
+                       style="width:96px;height:96px;object-fit:cover;border-radius:var(--radius,8px);border:1px solid var(--border,#e2e2e0);">
+                  <div class="form-check d-flex align-items-center justify-content-center gap-1 mt-1">
+                    <input class="form-check-input m-0" type="checkbox" name="remove_photos" value="{{ photo.id }}" id="remove_photo_{{ photo.id }}">
+                    <label class="form-check-label small text-danger" for="remove_photo_{{ photo.id }}">Remove</label>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="form-text">Check "Remove" under a photo to delete it when you save. Uploading new photos above will be added alongside the remaining ones.</div>
+          </div>
+        {% endif %}
+
+        <div class="d-flex justify-content-end gap-2">
+          <a class="btn btn-outline-secondary"
+             href="{{ url_for('meals.day_view', date_str=selected_date.isoformat()) }}">Cancel</a>
+          {{ form.submit(class="btn btn-primary", value="Save changes") }}
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

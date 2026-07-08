@@ -1,6 +1,5 @@
-from flask import Blueprint, redirect, url_for, render_template, abort, current_app
+from flask import Blueprint, redirect, send_from_directory, url_for, render_template, abort, current_app, request
 from flask_login import login_required, current_user
-from werkzeug.utils import secure_filename
 from datetime import timedelta, date
 import os
 
@@ -19,6 +18,12 @@ meals_bp = Blueprint("meals", __name__, url_prefix="/meals")
 @login_required
 def index():
     return redirect(url_for("meals.day_view", date_str=date.today().isoformat()))
+
+
+@meals_bp.route("/uploads/<path:filename>")
+@login_required
+def uploaded_file(filename):
+    return send_from_directory(current_app.config["UPLOAD_FOLDER"], filename)
 
 
 @meals_bp.route("/day/<date_str>/", methods=["GET", "POST"])
@@ -92,7 +97,47 @@ def add_meal(date_str):
 @meals_bp.route("/day/<date_str>/meal/<int:meal_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_meal(date_str, meal_id):
-    return redirect(url_for("meals.day_view", date_str=date_str))
+    try:
+        selected_date = date.fromisoformat(date_str)
+    except ValueError:
+        abort(404, description="Invalid date format. Use YYYY-MM-DD.")
+
+    meal = Meal.query.filter_by(id=meal_id, user_id=current_user.id).first_or_404()
+
+    form = MealForm(obj=meal)
+
+    if form.validate_on_submit():
+        meal.name = form.name.data
+        meal.calorie_kcal = form.calorie_kcal.data
+        meal.protein_g = form.protein_g.data
+        meal.carb_g = form.carb_g.data
+        meal.fat_g = form.fat_g.data
+        meal.description = form.description.data
+
+        # remove photos if any
+        remove_ids = request.form.getlist("remove_photos", type=int)
+        if remove_ids:
+            photos_to_remove = MealPhoto.query.filter(
+                MealPhoto.id.in_(remove_ids), 
+                MealPhoto.meal_id == meal.id
+            ).all()
+            for photo in photos_to_remove:
+                filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], photo.filename)
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+                db.session.delete(photo)
+
+        # add new photos if any
+        for photo in form.new_photos.data or []:
+            if photo and photo.filename:
+                filename = make_unique_filename(photo.filename)
+                photo.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+                db.session.add(MealPhoto(meal=meal, filename=filename))
+
+        db.session.commit()
+        return redirect(url_for("meals.day_view", date_str=selected_date.isoformat()))
+    
+    return render_template("meals/edit_meal.html", form=form, selected_date=selected_date, meal=meal)
 
 
 @meals_bp.route("/day/<date_str>/meal/<int:meal_id>/delete", methods=["POST"])
