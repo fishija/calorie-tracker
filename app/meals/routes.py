@@ -7,6 +7,7 @@ import os
 from app.db import db
 from app.models import Meal, MealPhoto
 from app.meals.forms import MealForm
+from app.meals.utils import make_unique_filename
 from app.meals.services import compute_totals
 from app.meals.queries import get_meals_for_date
 from app.goals.queries import get_goal_for_date
@@ -77,7 +78,7 @@ def add_meal(date_str):
             for photo in form.photos.data:
                 if photo:
                     # Save the photo and create a MealPhoto instance
-                    filename = secure_filename(photo.filename)
+                    filename = make_unique_filename(photo.filename)
                     photo.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
                     meal_photo = MealPhoto(meal=new_meal, filename=filename)
                     db.session.add(meal_photo)
