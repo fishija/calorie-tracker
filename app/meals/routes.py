@@ -29,8 +29,8 @@ def day_view(date_str=None):
     next_date = selected_date + timedelta(days=1)
 
     meals = get_meals_for_date(current_user.id, selected_date)
+    goal = get_goal_for_date(current_user.id, selected_date)
     totals = compute_totals(meals)
-    goal = get_goal_for_date(current_user.id)
 
     return render_template(
         "meals/day.html", 

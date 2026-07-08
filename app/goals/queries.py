@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, date as date_type
 from app.models import Goal
 from app.db import db
 
@@ -20,12 +20,12 @@ def get_todays_goal(user_id: int) -> Goal | None:
     )
 
 
-def get_goal_for_date(user_id: int, target_date: datetime = datetime.now(timezone.utc)) -> Goal | None:
+def get_goal_for_date(user_id: int, selected_date: date_type) -> Goal | None:
     # Get latest goal that is effective on or before the target date
     goal = (
         Goal.query.filter(
             Goal.user_id == user_id,
-            Goal.effective_date <= target_date
+            Goal.effective_date <= selected_date
         ).order_by(Goal.effective_date.desc())
         .first()
     )
@@ -35,7 +35,7 @@ def get_goal_for_date(user_id: int, target_date: datetime = datetime.now(timezon
         goal = (
             Goal.query.filter(
                 Goal.user_id == user_id,
-                Goal.effective_date > target_date
+                Goal.effective_date > selected_date
             ).order_by(Goal.effective_date.asc())
             .first()
         )
