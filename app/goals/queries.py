@@ -18,3 +18,27 @@ def get_todays_goal(user_id: int) -> Goal | None:
             Goal.effective_date < end
         ).first()
     )
+
+
+def get_goal_for_date(user_id: int, target_date: datetime = datetime.now(timezone.utc)) -> Goal | None:
+    # Get latest goal that is effective on or before the target date
+    goal = (
+        Goal.query.filter(
+            Goal.user_id == user_id,
+            Goal.effective_date <= target_date
+        ).order_by(Goal.effective_date.desc())
+        .first()
+    )
+
+    # If no such goal exists, search for the earliest goal that is effective after the target date
+    if goal is None:
+        goal = (
+            Goal.query.filter(
+                Goal.user_id == user_id,
+                Goal.effective_date > target_date
+            ).order_by(Goal.effective_date.asc())
+            .first()
+        )
+
+    # If no goal is found, return None
+    return goal
