@@ -97,4 +97,19 @@ def edit_meal(date_str, meal_id):
 @meals_bp.route("/day/<date_str>/meal/<int:meal_id>/delete", methods=["POST"])
 @login_required
 def delete_meal(date_str, meal_id):
-    return redirect(url_for("meals.day_view", date_str=date_str))
+    try:
+        selected_date = date.fromisoformat(date_str)
+    except ValueError:
+        abort(404, description="Invalid date format. Use YYYY-MM-DD.")
+
+    meal = Meal.query.filter_by(id=meal_id, user_id=current_user.id).first_or_404()
+    
+    # Delete associated photos from the filesystem
+    for photo in meal.photos:
+        photo_path = os.path.join(current_app.config['UPLOAD_FOLDER'], photo.filename)
+        if os.path.exists(photo_path):
+            os.remove(photo_path)
+
+    db.session.delete(meal)
+    db.session.commit()
+    return redirect(url_for("meals.day_view", date_str=selected_date.isoformat()))
