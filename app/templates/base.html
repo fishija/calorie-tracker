@@ -13,7 +13,7 @@
     <a class="brand" href="{{ url_for('main.index') }}">{{ current_food_icon }} Calorie Tracker</a>
     <div class="links">
       {% if current_user.is_authenticated %}
-        <a href="{{ url_for('main.index') }}">Today</a>
+        <a href="{{ url_for('meals.index') }}">Today</a>
         <a href="{{ url_for('goals.index') }}">Goals</a>
 
         <span class="user-email">{{ current_user.email }}</span>

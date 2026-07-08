@@ -6,6 +6,9 @@ dist/
 wheels/
 *.egg-info
 
+# Uploaded files
+uploads/
+
 # Migration/db files
 migrations/alembic.ini
 *.db

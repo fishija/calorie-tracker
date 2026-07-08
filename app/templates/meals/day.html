@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Day view — {{ selected_date.strftime("%Y-%m-%d") }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Date nav -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <a class="btn btn-outline-secondary btn-sm"
+       href="{{ url_for('meals.day_view', date_str=prev_date.isoformat()) }}">&#9664;</a>
+
+    <div class="d-flex align-items-center gap-2">
+      <h1 class="h5 mb-0">{{ selected_date.strftime("%Y-%m-%d") }}</h1>
+      <input type="date"
+             class="form-control form-control-sm"
+             value="{{ selected_date.isoformat() }}"
+             onchange="window.location.href = '{{ url_for('meals.day_view', date_str='PLACEHOLDER') }}'.replace('PLACEHOLDER', this.value)">
+    </div>
+
+    <a class="btn btn-outline-secondary btn-sm"
+       href="{{ url_for('meals.day_view', date_str=next_date.isoformat()) }}">&#9654;</a>
+  </div>
+
+  <!-- Macro totals -->
+  <div class="card mb-4">
+    <div class="card-body">
+
+      <div class="mb-3">
+        <div class="d-flex justify-content-between small mb-1">
+          <span>Calories</span>
+          <span>{{ totals.calories }} / {{ goal.calorie_kcal if goal else "—" }}</span>
+        </div>
+          <div class="progress" role="progressbar" style="height: 8px;">
+            {% if goal and goal.calorie_kcal %}
+              {% if totals.calories <= goal.calorie_kcal %}
+                <div class="progress-bar bg-success"
+                    style="width: {{ (totals.calories / goal.calorie_kcal * 100) | round(2) }}%">
+                </div>
+              {% else %}
+                {% set green_pct = (goal.calorie_kcal / totals.calories * 100) | round(2) %}
+                <div class="progress-bar bg-success"
+                    style="width: {{ green_pct }}%">
+                </div>
+                <div class="progress-bar bg-danger"
+                    style="width: {{ (100 - green_pct) | round(2) }}%">
+                </div>
+              {% endif %}
+            {% endif %}
+          </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="d-flex justify-content-between small mb-1">
+          <span>Protein</span>
+          <span>{{ totals.proteins }} / {{ goal.protein_g if goal else "—" }}g</span>
+        </div>
+        <div class="progress" role="progressbar" style="height: 8px;">
+          {% if goal and goal.protein_g %}
+            {% if totals.proteins <= goal.protein_g %}
+              <div class="progress-bar bg-success"
+                  style="width: {{ (totals.proteins / goal.protein_g * 100) | round(2) }}%">
+              </div>
+            {% else %}
+              {% set green_pct = (goal.protein_g / totals.proteins * 100) | round(2) %}
+              <div class="progress-bar bg-success"
+                  style="width: {{ green_pct }}%">
+              </div>
+              <div class="progress-bar bg-danger"
+                  style="width: {{ (100 - green_pct) | round(2) }}%">
+              </div>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="d-flex justify-content-between small mb-1">
+          <span>Carbs</span>
+          <span>{{ totals.carbs }} / {{ goal.carb_g if goal else "—" }}g</span>
+        </div>
+        <div class="progress" role="progressbar" style="height: 8px;">
+          {% if goal and goal.carb_g %}
+            {% if totals.carbs <= goal.carb_g %}
+              <div class="progress-bar bg-success"
+                  style="width: {{ (totals.carbs / goal.carb_g * 100) | round(2) }}%">
+              </div>
+            {% else %}
+              {% set green_pct = (goal.carb_g / totals.carbs * 100) | round(2) %}
+              <div class="progress-bar bg-success"
+                  style="width: {{ green_pct }}%">
+              </div>
+              <div class="progress-bar bg-danger"
+                  style="width: {{ (100 - green_pct) | round(2) }}%">
+              </div>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="mb-0">
+        <div class="d-flex justify-content-between small mb-1">
+          <span>Fat</span>
+          <span>{{ totals.fats }} / {{ goal.fat_g if goal else "—" }}g</span>
+        </div>
+        <div class="progress" role="progressbar" style="height: 8px;">
+          {% if goal and goal.fat_g %}
+            {% if totals.fats <= goal.fat_g %}
+              <div class="progress-bar bg-success"
+                  style="width: {{ (totals.fats / goal.fat_g * 100) | round(2) }}%">
+              </div>
+            {% else %}
+              {% set green_pct = (goal.fat_g / totals.fats * 100) | round(2) %}
+              <div class="progress-bar bg-success"
+                  style="width: {{ green_pct }}%">
+              </div>
+              <div class="progress-bar bg-danger"
+                  style="width: {{ (100 - green_pct) | round(2) }}%">
+              </div>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Meals list -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="h5 mb-0">Meals today</h2>
+    <a href="{{ url_for('meals.add_meal', date_str=selected_date.isoformat()) }}"
+       class="btn btn-primary btn-sm">+ Add</a>
+  </div>
+
+  {% if meals %}
+    <div class="list-group">
+      {% for meal in meals %}
+        <div class="list-group-item">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <strong>{{ meal.name }}</strong>
+              {% if meal.description %}
+                <div class="small text-muted">{{ meal.description }}</div>
+              {% endif %}
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+              <span class="text-nowrap">
+                P:{{ meal.protein_g }}g C:{{ meal.carb_g }}g F:{{ meal.fat_g }}g {{ meal.calorie_kcal }} kcal
+              </span>
+              <a href="{{ url_for('meals.edit_meal', date_str=selected_date.isoformat(), meal_id=meal.id) }}" title="Edit">Edit</a>
+              <form method="post" action="{{ url_for('meals.delete_meal', date_str=selected_date.isoformat(), meal_id=meal.id) }}"
+                    onsubmit="return confirm('Delete this meal?');" class="d-inline m-0">
+                    <button type="submit" class="btn btn-link p-0 text-danger" title="Delete"style="background:none;">Delete</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No meals logged for this day yet.</p>
+  {% endif %}
+
+</div>
+{% endblock %}
