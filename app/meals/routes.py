@@ -7,7 +7,8 @@ import os
 from app.db import db
 from app.models import Meal, MealPhoto
 from app.meals.forms import MealForm
-from app.meals.queries import get_meals_for_date, compute_totals
+from app.meals.services import compute_totals
+from app.meals.queries import get_meals_for_date
 from app.goals.queries import get_goal_for_date
 
 meals_bp = Blueprint("meals", __name__, url_prefix="/meals")
