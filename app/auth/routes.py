@@ -1,12 +1,13 @@
 """Authentication routes for user registration, login, and logout."""
 
-from flask import Blueprint, render_template, redirect, url_for, flash, request
-from flask_login import login_user, logout_user, login_required, current_user
 from urllib.parse import urlparse
 
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required, login_user, logout_user
+
+from app.auth.forms import LoginForm, RegisterForm
 from app.db import db
 from app.models import User
-from app.auth.forms import RegisterForm, LoginForm
 
 auth_bp = Blueprint("auth", __name__, template_folder="templates")
 
@@ -28,8 +29,7 @@ def register():
         username = form.username.data.strip()
 
         existing = User.query.filter(
-            (db.func.lower(User.email) == email) |
-            (db.func.lower(User.username) == username)
+            (db.func.lower(User.email) == email) | (db.func.lower(User.username) == username)
         ).first()
 
         if existing:
@@ -43,7 +43,7 @@ def register():
 
         login_user(user)
         return redirect(url_for("main.index"))
-    
+
     return render_template("auth/register.html", form=form)
 
 
@@ -59,27 +59,26 @@ def login():
     """
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
-    
+
     form = LoginForm()
     if form.validate_on_submit():
         identifier = form.email_or_username.data.strip().lower()
 
         user = User.query.filter(
-            (db.func.lower(User.email) == identifier) |
-            (db.func.lower(User.username) == identifier)
+            (db.func.lower(User.email) == identifier) | (db.func.lower(User.username) == identifier)
         ).first()
 
         if user is None or not user.check_password(form.password.data):
             flash("Invalid credentials.", "danger")
             return redirect(url_for("auth.login"))
-        
+
         login_user(user, remember=form.remember.data)
 
         next_page = request.args.get("next")
         if not next_page or urlparse(next_page).netloc != "":
             next_page = url_for("main.index")
         return redirect(next_page)
-    
+
     return render_template("auth/login.html", form=form)
 
 

@@ -1,8 +1,8 @@
 """Authentication forms for user registration and login."""
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
-from wtforms.validators import DataRequired, Email, Length, EqualTo
+from wtforms import BooleanField, PasswordField, StringField, SubmitField
+from wtforms.validators import DataRequired, Email, EqualTo, Length
 
 
 class RegisterForm(FlaskForm):
@@ -15,12 +15,11 @@ class RegisterForm(FlaskForm):
         confirm (PasswordField): Password confirmation.
         submit (SubmitField): Submit button for the form.
     """
+
     email = StringField("Email", validators=[DataRequired(), Email()])
     username = StringField("Username", validators=[DataRequired(), Length(min=3, max=25)])
     password = PasswordField("Password", validators=[DataRequired(), Length(min=8)])
-    confirm = PasswordField(
-        "Confirm password", validators=[DataRequired(), EqualTo("password")]
-    )
+    confirm = PasswordField("Confirm password", validators=[DataRequired(), EqualTo("password")])
     submit = SubmitField("Register")
 
 
@@ -36,9 +35,8 @@ class LoginForm(FlaskForm):
         remember (BooleanField): Option to remember the user.
         submit (SubmitField): Submit button for the form.
     """
-    email_or_username = StringField(
-        "Email or Username", validators=[DataRequired()]
-    )
+
+    email_or_username = StringField("Email or Username", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
     remember = BooleanField("Remember me")
     submit = SubmitField("Log in")

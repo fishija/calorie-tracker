@@ -1,11 +1,13 @@
 """Application factory module for initializing the Flask app."""
 
-from flask import Flask
-from config import config
-from flask_login import LoginManager
-from app.db import db, init_db
-import random
 import os
+import random
+
+from flask import Flask
+from flask_login import LoginManager
+
+from app.db import db, init_db
+from config import config
 
 login_manager = LoginManager()
 
@@ -13,7 +15,7 @@ login_manager = LoginManager()
 def create_app():
     """Create and configure an instance of the Flask application."""
     app = Flask(__name__, instance_relative_config=True)
-    
+
     env = os.environ.get("FLASK_ENV", "development")
     app.config.from_object(config[env])
 
@@ -30,17 +32,21 @@ def create_app():
     @login_manager.user_loader
     def load_user(user_id):
         return db.session.get(User, int(user_id))
-    
+
     from app.auth.routes import auth_bp
+
     app.register_blueprint(auth_bp, url_prefix="/auth")
 
     from app.routes import main_bp
+
     app.register_blueprint(main_bp)
 
     from app.goals.routes import goals_bp
+
     app.register_blueprint(goals_bp, url_prefix="/goals")
 
     from app.meals.routes import meals_bp
+
     app.register_blueprint(meals_bp, url_prefix="/meals")
 
     @app.context_processor

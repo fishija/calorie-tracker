@@ -4,9 +4,10 @@ Loads environment variables from a .env file and defines configurations
 for different deployment environments (development, production).
 """
 
-from dotenv import load_dotenv
 import os
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -20,23 +21,89 @@ class Config:
 
     # Little fun stuff
     FOOD_ICONS = [
-        "🍇","🍈","🍊","🍋","🍌","🍍","🥭","🍎","🍐","🍑","🍒",
-        "🍓","🫐","🍅","🫒","🥑","🍆","🥕","🌽","🌶️","🫑","🥒",
-        "🥦","🧄","🧅","🥜","🫚","🫛","🍞","🥐","🥨","🧇","🧀",
-        "🍗","🥩","🥓","🍔","🍟","🍕","🌭","🥪","🌮","🌯","🫔",
-        "🥗","🍿","🥫","🍝","🍱","🍙","🍜","🍣","🍤","🍥","🥮",
-        "🥟","🥠","🍦","🍩","🍪","🍰","🧁","🍫","🍬","🍭","🍵",
-        "🍾","🍷","🍹","🧋","🧃"
+        "🍇",
+        "🍈",
+        "🍊",
+        "🍋",
+        "🍌",
+        "🍍",
+        "🥭",
+        "🍎",
+        "🍐",
+        "🍑",
+        "🍒",
+        "🍓",
+        "🫐",
+        "🍅",
+        "🫒",
+        "🥑",
+        "🍆",
+        "🥕",
+        "🌽",
+        "🌶️",
+        "🫑",
+        "🥒",
+        "🥦",
+        "🧄",
+        "🧅",
+        "🥜",
+        "🫚",
+        "🫛",
+        "🍞",
+        "🥐",
+        "🥨",
+        "🧇",
+        "🧀",
+        "🍗",
+        "🥩",
+        "🥓",
+        "🍔",
+        "🍟",
+        "🍕",
+        "🌭",
+        "🥪",
+        "🌮",
+        "🌯",
+        "🫔",
+        "🥗",
+        "🍿",
+        "🥫",
+        "🍝",
+        "🍱",
+        "🍙",
+        "🍜",
+        "🍣",
+        "🍤",
+        "🍥",
+        "🥮",
+        "🥟",
+        "🥠",
+        "🍦",
+        "🍩",
+        "🍪",
+        "🍰",
+        "🧁",
+        "🍫",
+        "🍬",
+        "🍭",
+        "🍵",
+        "🍾",
+        "🍷",
+        "🍹",
+        "🧋",
+        "🧃",
     ]
 
 
 class DevelopmentConfig(Config):
     """Development configuration class with settings for local development."""
+
     DEBUG = True
 
 
 class ProductionConfig(Config):
     """Production configuration class with settings for deployment."""
+
     DEBUG = False
 
 

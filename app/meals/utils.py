@@ -1,6 +1,7 @@
 """Utility functions for meal-related operations."""
 
 import uuid
+
 from werkzeug.utils import secure_filename
 
 

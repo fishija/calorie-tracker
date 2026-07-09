@@ -1,9 +1,11 @@
 """Database models for the calorie tracker application."""
 
+from datetime import datetime, timezone
+
 from flask_login import UserMixin
 from sqlalchemy import UniqueConstraint
-from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timezone
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from app.db import db
 
 
@@ -17,6 +19,7 @@ class User(UserMixin, db.Model):
         password_hash (str): The hashed password of the user.
         created_at (datetime): The timestamp when the user was created.
     """
+
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -38,7 +41,8 @@ class User(UserMixin, db.Model):
 class Goal(db.Model):
     """Goal model representing a user's nutritional goals for a specific date.
 
-    Unique constraint is enforced on the combination of user_id and effective_date to ensure that a user can only have one goal per date.
+    Unique constraint is enforced on the combination of user_id and effective_date
+    to ensure that a user can only have one goal per date.
 
     Attributes:
         id (int): The primary key for the goal.
@@ -50,20 +54,23 @@ class Goal(db.Model):
         fat_g (int): The target fat intake in grams.
         created_at (datetime): The timestamp when the goal was created.
     """
+
     __tablename__ = "goals"
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    effective_date = db.Column(db.Date, nullable=False, default=lambda: datetime.now(timezone.utc).date())
+
+    effective_date = db.Column(
+        db.Date, nullable=False, default=lambda: datetime.now(timezone.utc).date()
+    )
+
     calorie_kcal = db.Column(db.Integer, nullable=False)
     protein_g = db.Column(db.Integer, nullable=False)
     carb_g = db.Column(db.Integer, nullable=False)
     fat_g = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
-    __table_args__ = (
-        UniqueConstraint('user_id', 'effective_date', name='uq_user_goal_date'),
-    )
+    __table_args__ = (UniqueConstraint("user_id", "effective_date", name="uq_user_goal_date"),)
 
 
 class Meal(db.Model):
@@ -82,6 +89,7 @@ class Meal(db.Model):
         created_at (datetime): The timestamp when the meal was created.
         photos (list[MealPhoto]): A list of associated MealPhoto objects.
     """
+
     __tablename__ = "meals"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -108,6 +116,7 @@ class MealPhoto(db.Model):
         filename (str): The filename of the uploaded photo.
         uploaded_at (datetime): The timestamp when the photo was uploaded.
     """
+
     __tablename__ = "meal_photos"
 
     id = db.Column(db.Integer, primary_key=True)

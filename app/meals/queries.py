@@ -1,6 +1,7 @@
 """Query functions for retrieving meal data from the database."""
 
 from datetime import date
+
 from app.models import Meal
 
 
@@ -15,8 +16,7 @@ def get_meals_for_date(user_id: int, selected_date: date) -> list[Meal]:
         list[Meal]: A list of meals logged by the user on the specified date.
     """
     return (
-        Meal.query
-        .filter(Meal.user_id == user_id, Meal.logged_date == selected_date)
+        Meal.query.filter(Meal.user_id == user_id, Meal.logged_date == selected_date)
         .order_by(Meal.created_at.asc())
         .all()
     )

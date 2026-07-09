@@ -1,17 +1,27 @@
 """Routes for managing meals and nutritional data."""
 
-from flask import Blueprint, redirect, send_from_directory, url_for, render_template, abort, current_app, request
-from flask_login import login_required, current_user
-from datetime import timedelta, date
 import os
+from datetime import date, timedelta
+
+from flask import (
+    Blueprint,
+    abort,
+    current_app,
+    redirect,
+    render_template,
+    request,
+    send_from_directory,
+    url_for,
+)
+from flask_login import current_user, login_required
 
 from app.db import db
-from app.models import Meal, MealPhoto
-from app.meals.forms import MealForm
-from app.meals.utils import make_unique_filename
-from app.meals.services import compute_totals
-from app.meals.queries import get_meals_for_date
 from app.goals.queries import get_goal_for_date
+from app.meals.forms import MealForm
+from app.meals.queries import get_meals_for_date
+from app.meals.services import compute_totals
+from app.meals.utils import make_unique_filename
+from app.models import Meal, MealPhoto
 
 meals_bp = Blueprint("meals", __name__, url_prefix="/meals")
 
@@ -40,7 +50,8 @@ def uploaded_file(filename: str):
 @meals_bp.route("/day/<date_str>/", methods=["GET", "POST"])
 @login_required
 def day_view(date_str=None):
-    """View function for displaying meals logged on a specific date, along with nutritional totals and goals.
+    """View function for displaying meals logged on a specific date, along with
+    nutritional totals and goals.
 
     Args:
         date_str (str, optional): The date string in YYYY-MM-DD format. Defaults to None.
@@ -50,12 +61,12 @@ def day_view(date_str=None):
     """
     if date_str is None:
         return redirect(url_for("meals.day_view", date_str=date.today().isoformat()))
-    
+
     try:
         selected_date = date.fromisoformat(date_str)
     except ValueError:
         abort(404, description="Invalid date format. Use YYYY-MM-DD.")
-    
+
     prev_date = selected_date - timedelta(days=1)
     next_date = selected_date + timedelta(days=1)
 
@@ -64,13 +75,13 @@ def day_view(date_str=None):
     totals = compute_totals(meals)
 
     return render_template(
-        "meals/day.html", 
-        selected_date=selected_date, 
-        prev_date=prev_date, 
+        "meals/day.html",
+        selected_date=selected_date,
+        prev_date=prev_date,
         next_date=next_date,
         meals=meals,
         totals=totals,
-        goal=goal
+        goal=goal,
     )
 
 
@@ -102,7 +113,7 @@ def add_meal(date_str):
             protein_g=form.protein_g.data,
             carb_g=form.carb_g.data,
             fat_g=form.fat_g.data,
-            description=form.description.data
+            description=form.description.data,
         )
 
         # Handle photo uploads if any
@@ -110,7 +121,7 @@ def add_meal(date_str):
             if photo:
                 # Save the photo and create a MealPhoto instance
                 filename = make_unique_filename(photo.filename)
-                photo.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+                photo.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
                 meal_photo = MealPhoto(meal=new_meal, filename=filename)
                 db.session.add(meal_photo)
 
@@ -154,8 +165,7 @@ def edit_meal(date_str: str, meal_id: int):
         remove_ids = request.form.getlist("remove_photos", type=int)
         if remove_ids:
             photos_to_remove = MealPhoto.query.filter(
-                MealPhoto.id.in_(remove_ids), 
-                MealPhoto.meal_id == meal.id
+                MealPhoto.id.in_(remove_ids), MealPhoto.meal_id == meal.id
             ).all()
             for photo in photos_to_remove:
                 filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], photo.filename)
@@ -167,13 +177,15 @@ def edit_meal(date_str: str, meal_id: int):
         for photo in form.new_photos.data or []:
             if photo and photo.filename:
                 filename = make_unique_filename(photo.filename)
-                photo.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+                photo.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
                 db.session.add(MealPhoto(meal=meal, filename=filename))
 
         db.session.commit()
         return redirect(url_for("meals.day_view", date_str=selected_date.isoformat()))
-    
-    return render_template("meals/edit_meal.html", form=form, selected_date=selected_date, meal=meal)
+
+    return render_template(
+        "meals/edit_meal.html", form=form, selected_date=selected_date, meal=meal
+    )
 
 
 @meals_bp.route("/day/<date_str>/meal/<int:meal_id>/delete", methods=["POST"])
@@ -194,10 +206,10 @@ def delete_meal(date_str: str, meal_id: int):
         abort(404, description="Invalid date format. Use YYYY-MM-DD.")
 
     meal = Meal.query.filter_by(id=meal_id, user_id=current_user.id).first_or_404()
-    
+
     # Delete associated photos from the filesystem
     for photo in meal.photos:
-        photo_path = os.path.join(current_app.config['UPLOAD_FOLDER'], photo.filename)
+        photo_path = os.path.join(current_app.config["UPLOAD_FOLDER"], photo.filename)
         if os.path.exists(photo_path):
             os.remove(photo_path)
 

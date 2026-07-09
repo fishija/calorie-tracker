@@ -2,13 +2,13 @@
 
 from datetime import date
 
-from flask import Blueprint, flash, redirect, url_for, render_template
-from flask_login import login_required, current_user
+from flask import Blueprint, flash, redirect, render_template, url_for
+from flask_login import current_user, login_required
 
 from app.db import db
-from app.models import Goal
 from app.goals.forms import GoalForm
 from app.goals.queries import get_todays_goal
+from app.models import Goal
 
 goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
@@ -47,14 +47,14 @@ def index():
                 calorie_kcal=form.calorie_kcal.data,
                 protein_g=form.protein_g.data,
                 carb_g=form.carb_g.data,
-                fat_g=form.fat_g.data
+                fat_g=form.fat_g.data,
             )
             db.session.add(new_goal)
             flash("New goal has been added, effective today.", "success")
 
         db.session.commit()
         return redirect(url_for("goals.index"))
-    
+
     history = (
         Goal.query.filter(Goal.user_id == current_user.id)
         .order_by(Goal.effective_date.desc())
