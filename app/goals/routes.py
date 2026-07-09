@@ -24,7 +24,12 @@ def index():
         Response: The rendered template for the goals index page.
     """
     todays_goal = get_todays_goal(user_id=current_user.id)
-    form = GoalForm()
+
+    # If today's goal exists, pre-populate the form with its values
+    if todays_goal and not GoalForm().is_submitted():
+        form = GoalForm(obj=todays_goal)
+    else:
+        form = GoalForm()
 
     if form.validate_on_submit():
         if todays_goal:
