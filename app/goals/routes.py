@@ -1,3 +1,5 @@
+"""Goal routes for managing user nutritional goals."""
+
 from datetime import date
 
 from flask import Blueprint, flash, redirect, url_for, render_template
@@ -14,6 +16,13 @@ goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
 @goals_bp.route("/", methods=["GET", "POST"])
 @login_required
 def index():
+    """View function for the goals index page.
+
+    Handles displaying the current day's goal, the goal form, and the user's goal history.
+
+    Returns:
+        Response: The rendered template for the goals index page.
+    """
     todays_goal = get_todays_goal(user_id=current_user.id)
     form = GoalForm()
 
