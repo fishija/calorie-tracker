@@ -28,12 +28,12 @@ class Goal(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    effective_date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    effective_date = db.Column(db.Date, nullable=False, default=lambda: datetime.now(timezone.utc).date())
     calorie_kcal = db.Column(db.Integer, nullable=False)
     protein_g = db.Column(db.Integer, nullable=False)
     carb_g = db.Column(db.Integer, nullable=False)
     fat_g = db.Column(db.Integer, nullable=False)
-    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class Meal(db.Model):

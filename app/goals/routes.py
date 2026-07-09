@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, timedelta
+from datetime import date
 
 from flask import Blueprint, flash, redirect, url_for, render_template
 from flask_login import login_required, current_user
@@ -29,7 +29,7 @@ def index():
             # Create new goal
             new_goal = Goal(
                 user_id=current_user.id,
-                effective_date=datetime.now(timezone.utc),
+                effective_date=date.today(),
                 calorie_kcal=form.calorie_kcal.data,
                 protein_g=form.protein_g.data,
                 carb_g=form.carb_g.data,
