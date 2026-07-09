@@ -1,3 +1,5 @@
+"""Routes for managing meals and nutritional data."""
+
 from flask import Blueprint, redirect, send_from_directory, url_for, render_template, abort, current_app, request
 from flask_login import login_required, current_user
 from datetime import timedelta, date
@@ -17,18 +19,35 @@ meals_bp = Blueprint("meals", __name__, url_prefix="/meals")
 @meals_bp.route("/", methods=["GET"])
 @login_required
 def index():
+    """Redirect to the current day's meal view."""
     return redirect(url_for("meals.day_view", date_str=date.today().isoformat()))
 
 
 @meals_bp.route("/uploads/<path:filename>")
 @login_required
-def uploaded_file(filename):
+def uploaded_file(filename: str):
+    """Serve uploaded meal photos from the server's upload directory.
+
+    Args:
+        filename (str): The name of the file to be served.
+
+    Returns:
+        Response: The response object to send the file to the client.
+    """
     return send_from_directory(current_app.config["UPLOAD_FOLDER"], filename)
 
 
 @meals_bp.route("/day/<date_str>/", methods=["GET", "POST"])
 @login_required
 def day_view(date_str=None):
+    """View function for displaying meals logged on a specific date, along with nutritional totals and goals.
+
+    Args:
+        date_str (str, optional): The date string in YYYY-MM-DD format. Defaults to None.
+
+    Returns:
+        Response: The response object rendering the meal view template.
+    """
     if date_str is None:
         return redirect(url_for("meals.day_view", date_str=date.today().isoformat()))
     
@@ -58,6 +77,14 @@ def day_view(date_str=None):
 @meals_bp.route("/day/<date_str>/add", methods=["GET", "POST"])
 @login_required
 def add_meal(date_str):
+    """View function for adding a new meal entry for a specific date.
+
+    Args:
+        date_str (str): The date string in YYYY-MM-DD format.
+
+    Returns:
+        Response: The response object rendering the add meal template.
+    """
     try:
         selected_date = date.fromisoformat(date_str)
     except ValueError:
@@ -96,7 +123,16 @@ def add_meal(date_str):
 
 @meals_bp.route("/day/<date_str>/meal/<int:meal_id>/edit", methods=["GET", "POST"])
 @login_required
-def edit_meal(date_str, meal_id):
+def edit_meal(date_str: str, meal_id: int):
+    """View function for editing an existing meal entry for a specific date.
+
+    Args:
+        date_str (str): The date string in YYYY-MM-DD format.
+        meal_id (int): The ID of the meal to be edited.
+
+    Returns:
+        Response: The response object rendering the edit meal template.
+    """
     try:
         selected_date = date.fromisoformat(date_str)
     except ValueError:
@@ -142,7 +178,16 @@ def edit_meal(date_str, meal_id):
 
 @meals_bp.route("/day/<date_str>/meal/<int:meal_id>/delete", methods=["POST"])
 @login_required
-def delete_meal(date_str, meal_id):
+def delete_meal(date_str: str, meal_id: int):
+    """View function for deleting a meal entry for a specific date.
+
+    Args:
+        date_str (str): The date string in YYYY-MM-DD format.
+        meal_id (int): The ID of the meal to be deleted.
+
+    Returns:
+        Response: The response object redirecting to the day's meal view.
+    """
     try:
         selected_date = date.fromisoformat(date_str)
     except ValueError:
