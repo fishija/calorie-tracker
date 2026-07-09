@@ -1,3 +1,5 @@
+"""Authentication routes for user registration, login, and logout."""
+
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from urllib.parse import urlparse
@@ -11,6 +13,12 @@ auth_bp = Blueprint("auth", __name__, template_folder="templates")
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
+    """Handle new user registration.
+
+    Returns:
+        Response: Rendered registration template, or a redirect to
+            ``main.index`` / ``auth.register`` depending on outcome.
+    """
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
 
@@ -41,6 +49,14 @@ def register():
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
+    """Handle user login.
+
+    Allows user to login using either their email address or username, along with their password.
+
+    Returns:
+        Response: Rendered login template, or a redirect to the ``next``
+            page / ``main.index`` / ``auth.login`` depending on outcome.
+    """
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
     
@@ -70,6 +86,12 @@ def login():
 @auth_bp.route("/logout")
 @login_required
 def logout():
+    """Log out the current user and redirect to the login page.
+
+    Returns:
+        Response: Redirect to ``auth.login`` with a flashed confirmation
+            message.
+    """
     logout_user()
     flash("You have been logged out.", "info")
     return redirect(url_for("auth.login"))
