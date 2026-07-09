@@ -1,3 +1,5 @@
+"""Application factory module for initializing the Flask app."""
+
 from flask import Flask
 from config import config
 from flask_login import LoginManager
@@ -9,6 +11,7 @@ login_manager = LoginManager()
 
 
 def create_app():
+    """Create and configure an instance of the Flask application."""
     app = Flask(__name__, instance_relative_config=True)
     
     env = os.environ.get("FLASK_ENV", "development")

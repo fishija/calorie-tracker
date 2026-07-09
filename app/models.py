@@ -1,3 +1,5 @@
+"""Database models for the calorie tracker application."""
+
 from flask_login import UserMixin
 from sqlalchemy import UniqueConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -6,6 +8,15 @@ from app.db import db
 
 
 class User(UserMixin, db.Model):
+    """User model representing a registered user in the application.
+
+    Attributes:
+        id (int): The primary key for the user.
+        username (str): The unique username of the user.
+        email (str): The unique email address of the user.
+        password_hash (str): The hashed password of the user.
+        created_at (datetime): The timestamp when the user was created.
+    """
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -25,6 +36,20 @@ class User(UserMixin, db.Model):
 
 
 class Goal(db.Model):
+    """Goal model representing a user's nutritional goals for a specific date.
+
+    Unique constraint is enforced on the combination of user_id and effective_date to ensure that a user can only have one goal per date.
+
+    Attributes:
+        id (int): The primary key for the goal.
+        user_id (int): The foreign key referencing the user.
+        effective_date (date): The date for which the goal is set.
+        calorie_kcal (int): The target calorie intake in kilocalories.
+        protein_g (int): The target protein intake in grams.
+        carb_g (int): The target carbohydrate intake in grams.
+        fat_g (int): The target fat intake in grams.
+        created_at (datetime): The timestamp when the goal was created.
+    """
     __tablename__ = "goals"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -42,6 +67,21 @@ class Goal(db.Model):
 
 
 class Meal(db.Model):
+    """Meal model representing a meal logged by a user.
+
+    Attributes:
+        id (int): The primary key for the meal.
+        user_id (int): The foreign key referencing the user.
+        logged_date (date): The date when the meal was logged.
+        name (str): The name of the meal.
+        calorie_kcal (int): The calorie content of the meal in kilocalories.
+        protein_g (int): The protein content of the meal in grams.
+        carb_g (int): The carbohydrate content of the meal in grams.
+        fat_g (int): The fat content of the meal in grams.
+        description (str): An optional description of the meal.
+        created_at (datetime): The timestamp when the meal was created.
+        photos (list[MealPhoto]): A list of associated MealPhoto objects.
+    """
     __tablename__ = "meals"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -60,6 +100,14 @@ class Meal(db.Model):
 
 
 class MealPhoto(db.Model):
+    """MealPhoto model representing a photo associated with a meal.
+
+    Attributes:
+        id (int): The primary key for the meal photo.
+        meal_id (int): The foreign key referencing the associated meal.
+        filename (str): The filename of the uploaded photo.
+        uploaded_at (datetime): The timestamp when the photo was uploaded.
+    """
     __tablename__ = "meal_photos"
 
     id = db.Column(db.Integer, primary_key=True)
