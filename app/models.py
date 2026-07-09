@@ -1,4 +1,5 @@
 from flask_login import UserMixin
+from sqlalchemy import UniqueConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone
 from app.db import db
@@ -34,6 +35,10 @@ class Goal(db.Model):
     carb_g = db.Column(db.Integer, nullable=False)
     fat_g = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'effective_date', name='uq_user_goal_date'),
+    )
 
 
 class Meal(db.Model):

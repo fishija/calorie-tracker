@@ -8,8 +8,7 @@ def get_todays_goal(user_id: int) -> Goal | None:
         Goal.query.filter(
             Goal.user_id == user_id,
             Goal.effective_date == date_type.today(),
-        ).order_by(Goal.effective_date.desc())
-        .first()
+        ).first()
     )
     return goal
 
@@ -34,5 +33,4 @@ def get_goal_for_date(user_id: int, selected_date: date_type) -> Goal | None:
             .first()
         )
 
-    # If no goal is found, return None
     return goal
