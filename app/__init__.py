@@ -12,12 +12,14 @@ from config import config
 login_manager = LoginManager()
 
 
-def create_app():
+def create_app(config_name=None):
     """Create and configure an instance of the Flask application."""
     app = Flask(__name__, instance_relative_config=True)
 
-    env = os.environ.get("FLASK_ENV", "development")
-    app.config.from_object(config[env])
+    if config_name is None:
+        config_name = os.environ.get("FLASK_ENV", "development")
+
+    app.config.from_object(config[config_name])
 
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
