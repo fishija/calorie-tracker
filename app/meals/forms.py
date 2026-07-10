@@ -3,7 +3,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, MultipleFileField
 from wtforms import IntegerField, StringField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, NumberRange
 
 
 class MealForm(FlaskForm):
@@ -21,10 +21,10 @@ class MealForm(FlaskForm):
     """
 
     name = StringField("Name", validators=[DataRequired()])
-    calorie_kcal = IntegerField("Calories (kcal)", validators=[DataRequired()])
-    protein_g = IntegerField("Proteins (g)", validators=[DataRequired()])
-    carb_g = IntegerField("Carbohydrates (g)", validators=[DataRequired()])
-    fat_g = IntegerField("Fats (g)", validators=[DataRequired()])
+    calorie_kcal = IntegerField("Calories (kcal)", validators=[DataRequired(), NumberRange(min=0)])
+    protein_g = IntegerField("Proteins (g)", validators=[DataRequired(), NumberRange(min=0)])
+    carb_g = IntegerField("Carbohydrates (g)", validators=[DataRequired(), NumberRange(min=0)])
+    fat_g = IntegerField("Fats (g)", validators=[DataRequired(), NumberRange(min=0)])
 
     description = TextAreaField("Description")
     new_photos = MultipleFileField(
