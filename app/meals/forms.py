@@ -1,7 +1,7 @@
 """Forms for logging and managing user meals and nutritional data."""
 
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileAllowed, MultipleFileField
+from flask_wtf.file import FileAllowed, FileSize, MultipleFileField
 from wtforms import HiddenField, IntegerField, StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, NumberRange
 
@@ -37,7 +37,11 @@ class MealForm(FlaskForm):
 
     description = TextAreaField("Description")
     new_photos = MultipleFileField(
-        "Meal Photos", validators=[FileAllowed(["jpg", "jpeg", "png"], "Images only")]
+        "Meal Photos",
+        validators=[
+            FileSize(max_size=5 * 1024 * 1024, message="Each file must be less than 5MB."),
+            FileAllowed(["jpg", "jpeg", "png"], "Images only"),
+        ],
     )
 
     submit = SubmitField("Add Meal")
