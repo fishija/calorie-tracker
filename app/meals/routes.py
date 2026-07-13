@@ -85,29 +85,33 @@ def day_view(date_str=None):
     )
 
 
-@meals_bp.route("/day/<date_str>/add", methods=["GET", "POST"])
+@meals_bp.route("/add", methods=["GET", "POST"])
 @login_required
-def add_meal(date_str):
+def add_meal():
     """View function for adding a new meal entry for a specific date.
-
-    Args:
-        date_str (str): The date string in YYYY-MM-DD format.
 
     Returns:
         Response: The response object rendering the add meal template.
     """
+    date_str = request.args.get("date_str")
+
     try:
         selected_date = date.fromisoformat(date_str)
-    except ValueError:
-        abort(404, description="Invalid date format. Use YYYY-MM-DD.")
+    except TypeError, ValueError:
+        abort(404, description="Invalid or missing date.")
 
-    form = MealForm()
+    form = MealForm(logged_date=selected_date)
 
     if form.validate_on_submit():
+        try:
+            submitted_date = date.fromisoformat(form.logged_date.data)
+        except ValueError:
+            abort(400, description="Invalid date.")
+
         # Create new meal
         new_meal = Meal(
             user_id=current_user.id,
-            logged_date=selected_date,
+            logged_date=submitted_date,
             name=form.name.data,
             calorie_kcal=form.calorie_kcal.data,
             protein_g=form.protein_g.data,
@@ -127,29 +131,24 @@ def add_meal(date_str):
 
         db.session.add(new_meal)
         db.session.commit()
-        return redirect(url_for("meals.day_view", date_str=selected_date.isoformat()))
+        return redirect(url_for("meals.day_view", date_str=submitted_date.isoformat()))
 
     return render_template("meals/add_meal.html", form=form, selected_date=selected_date)
 
 
-@meals_bp.route("/day/<date_str>/meal/<int:meal_id>/edit", methods=["GET", "POST"])
+@meals_bp.route("/edit/<int:meal_id>", methods=["GET", "POST"])
 @login_required
-def edit_meal(date_str: str, meal_id: int):
+def edit_meal(meal_id: int):
     """View function for editing an existing meal entry for a specific date.
 
     Args:
-        date_str (str): The date string in YYYY-MM-DD format.
         meal_id (int): The ID of the meal to be edited.
 
     Returns:
         Response: The response object rendering the edit meal template.
     """
-    try:
-        selected_date = date.fromisoformat(date_str)
-    except ValueError:
-        abort(404, description="Invalid date format. Use YYYY-MM-DD.")
-
     meal = Meal.query.filter_by(id=meal_id, user_id=current_user.id).first_or_404()
+    selected_date = meal.logged_date
 
     form = MealForm(obj=meal)
 
@@ -188,24 +187,19 @@ def edit_meal(date_str: str, meal_id: int):
     )
 
 
-@meals_bp.route("/day/<date_str>/meal/<int:meal_id>/delete", methods=["POST"])
+@meals_bp.route("/delete/<int:meal_id>", methods=["POST"])
 @login_required
-def delete_meal(date_str: str, meal_id: int):
+def delete_meal(meal_id: int):
     """View function for deleting a meal entry for a specific date.
 
     Args:
-        date_str (str): The date string in YYYY-MM-DD format.
         meal_id (int): The ID of the meal to be deleted.
 
     Returns:
         Response: The response object redirecting to the day's meal view.
     """
-    try:
-        selected_date = date.fromisoformat(date_str)
-    except ValueError:
-        abort(404, description="Invalid date format. Use YYYY-MM-DD.")
-
     meal = Meal.query.filter_by(id=meal_id, user_id=current_user.id).first_or_404()
+    selected_date = meal.logged_date
 
     # Delete associated photos from the filesystem
     for photo in meal.photos:

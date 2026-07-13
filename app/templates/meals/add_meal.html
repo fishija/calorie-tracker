@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-  {{ "Edit meal" if mode == "edit" else "Add meal" }} — {{ selected_date.strftime("%Y-%m-%d") }}
+  Add meal — {{ selected_date.strftime("%Y-%m-%d") }}
 {% endblock %}
 
 {% block content %}
@@ -11,14 +11,16 @@
     <a class="btn btn-outline-secondary btn-sm"
        href="{{ url_for('meals.day_view', date_str=selected_date.isoformat()) }}">&#9664; Back</a>
     <h1 class="h5 mb-0">
-      {{ "Edit meal" if mode == "edit" else "Add meal" }} — {{ selected_date.strftime("%Y-%m-%d") }}
+      Add meal — {{ selected_date.strftime("%Y-%m-%d") }}
     </h1>
   </div>
 
   <div class="card">
     <div class="card-body">
 
-      <form method="post" enctype="multipart/form-data" novalidate>
+      <form method="post" 
+      action="{{ url_for('meals.add_meal', date_str=selected_date.isoformat()) }}"
+      enctype="multipart/form-data" novalidate>
         {{ form.hidden_tag() }}
 
         <div class="mb-3">

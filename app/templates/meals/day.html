@@ -11,7 +11,6 @@
        href="{{ url_for('meals.day_view', date_str=prev_date.isoformat()) }}">&#9664;</a>
 
     <div class="d-flex align-items-center gap-2">
-      <h1 class="h5 mb-0">{{ selected_date.strftime("%Y-%m-%d") }}</h1>
       <input type="date"
              class="form-control form-control-sm"
              value="{{ selected_date.isoformat() }}"
@@ -147,8 +146,8 @@
               <span class="text-nowrap">
                 P:{{ meal.protein_g }}g C:{{ meal.carb_g }}g F:{{ meal.fat_g }}g {{ meal.calorie_kcal }} kcal
               </span>
-              <a href="{{ url_for('meals.edit_meal', date_str=selected_date.isoformat(), meal_id=meal.id) }}" title="Edit">Edit</a>
-              <form method="post" action="{{ url_for('meals.delete_meal', date_str=selected_date.isoformat(), meal_id=meal.id) }}"
+              <a href="{{ url_for('meals.edit_meal', meal_id=meal.id) }}" title="Edit">Edit</a>
+              <form method="post" action="{{ url_for('meals.delete_meal', meal_id=meal.id) }}"
                     onsubmit="return confirm('Delete this meal?');" class="d-inline m-0">
                     <button type="submit" class="btn btn-link p-0 text-danger" title="Delete"style="background:none;">Delete</button>
               </form>
