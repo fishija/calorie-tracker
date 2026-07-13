@@ -7,6 +7,7 @@ from flask import (
     Blueprint,
     abort,
     current_app,
+    jsonify,
     redirect,
     render_template,
     request,
@@ -210,3 +211,23 @@ def delete_meal(meal_id: int):
     db.session.delete(meal)
     db.session.commit()
     return redirect(url_for("meals.day_view", date_str=selected_date.isoformat()))
+
+
+@meals_bp.route("/estimate_with_ai", methods=["POST"])
+@login_required
+def estimate_with_ai():
+    description = request.form.get("description", "")
+    uploaded_files = request.files.getlist("new_photos")
+
+    print(
+        f"Estimating meal with description: {description} and {len(uploaded_files)} uploaded files."
+    )
+
+    return jsonify(
+        {
+            "calorie_kcal": 0,
+            "protein_g": 0,
+            "carb_g": 0,
+            "fat_g": 0,
+        }
+    )
