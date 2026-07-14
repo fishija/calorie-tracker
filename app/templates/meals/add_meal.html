@@ -88,5 +88,53 @@
   </div>
 </div>
 
+<!-- AI Estimate Modal -->
+<div class="modal fade" id="aiEstimateModal" tabindex="-1" aria-labelledby="aiEstimateModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="aiEstimateModalLabel">AI estimate</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="ai-meal-summary" class="mb-3"></p>
+
+        <div class="row text-center mb-3 gy-2">
+          <div class="col-3">
+            <div class="fw-bold" id="ai-calorie-kcal">--</div>
+            <div class="text-muted small">kcal</div>
+          </div>
+          <div class="col-3">
+            <div class="fw-bold" id="ai-protein-g">--</div>
+            <div class="text-muted small">protein (g)</div>
+          </div>
+          <div class="col-3">
+            <div class="fw-bold" id="ai-carb-g">--</div>
+            <div class="text-muted small">carbs (g)</div>
+          </div>
+          <div class="col-3">
+            <div class="fw-bold" id="ai-fat-g">--</div>
+            <div class="text-muted small">fat (g)</div>
+          </div>
+        </div>
+
+        <div class="mb-2" id="ai-confidence-wrap">
+          <span class="text-muted small">Confidence:</span>
+          <span id="ai-confidence" class="badge bg-secondary"></span>
+        </div>
+
+        <div id="ai-assumptions-wrap" class="mb-0">
+          <p class="text-muted small mb-1">Assumptions</p>
+          <p id="ai-assumptions" class="small mb-0"></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" id="btn-ai-discard" data-bs-dismiss="modal">Discard</button>
+        <button type="button" class="btn btn-primary" id="btn-ai-accept" data-bs-dismiss="modal">Use these values</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="{{ url_for('static', filename='js/estimate_with_ai.js') }}"></script>
 {% endblock %}
