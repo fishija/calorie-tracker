@@ -1,5 +1,6 @@
 """Tests for meals module."""
 
+import base64
 import io
 from datetime import date
 
@@ -8,6 +9,8 @@ from werkzeug.datastructures import FileStorage
 
 from app.meals.forms import MealForm
 from app.meals.queries import get_meals_for_date
+from app.meals.routes import make_unique_filename, uploaded_files_to_bytes
+from app.meals.services import compute_totals
 from app.models import Meal
 
 
@@ -450,3 +453,115 @@ class TestDeleteMealRoute:
 
         response = client.post(f"/meals/delete/{meal.id}", follow_redirects=True)
         assert response.status_code == 404  # User2 should not be able to delete User1's meal
+
+
+class TestEstimateWithAIRoute:
+    def test_estimate_with_ai_requires_login(self, client):
+        response = client.post("/meals/estimate_with_ai", data={"description": "Test meal"})
+        assert response.status_code == 302  # Redirect to login
+
+    def test_estimate_with_ai_valid_submission(self, client, make_user, monkeypatch):
+        user = make_user()
+        client.post(
+            "/auth/login", data={"email_or_username": user.username, "password": "password123"}
+        )
+
+        # Mock the estimate_meal function to return a predictable result
+        def mock_estimate_meal(description, image_bytes_list=None, client=None):
+            return {
+                "meal_summary": "Mocked meal summary",
+                "calorie_kcal": 500,
+                "protein_g": 30,
+                "fat_g": 20,
+                "carb_g": 50,
+                "confidence": "high",
+                "assumptions": "Mocked assumptions",
+                "source_type": "text_description",
+            }
+
+        monkeypatch.setattr("app.meals.routes.estimate_meal", mock_estimate_meal)
+
+        response = client.post(
+            "/meals/estimate_with_ai",
+            data={"description": "Test meal"},
+            follow_redirects=True,
+        )
+        assert response.status_code == 200
+        json_data = response.get_json()
+        assert json_data["meal_summary"] == "Mocked meal summary"
+        assert json_data["calorie_kcal"] == 500
+        assert json_data["protein_g"] == 30
+        assert json_data["fat_g"] == 20
+        assert json_data["carb_g"] == 50
+        assert json_data["confidence"] == "high"
+        assert json_data["assumptions"] == "Mocked assumptions"
+        assert json_data["source_type"] == "text_description"
+
+    def test_estimate_with_ai_invalid_submission(self, client, make_user):
+        user = make_user()
+        client.post(
+            "/auth/login", data={"email_or_username": user.username, "password": "password123"}
+        )
+
+        response = client.post(
+            "/meals/estimate_with_ai",
+            data={},  # Missing description
+            follow_redirects=True,
+        )
+        assert response.status_code == 400
+        json_data = response.get_json()
+        # Since description is missing, the AI might return default values or an error message
+        assert "error" in json_data
+
+
+class TestServices:
+    def test_compute_totals(self, make_meal):
+        user_id = 1
+        meal1 = make_meal(user_id=user_id, calorie_kcal=300, protein_g=20, carb_g=40, fat_g=10)
+        meal2 = make_meal(user_id=user_id, calorie_kcal=600, protein_g=30, carb_g=70, fat_g=20)
+
+        totals = compute_totals([meal1, meal2])
+        assert totals["calories"] == 900
+        assert totals["proteins"] == 50
+        assert totals["carbs"] == 110
+        assert totals["fats"] == 30
+
+    def test_compute_totals_empty_list(self):
+        totals = compute_totals([])
+        assert totals["calories"] == 0
+        assert totals["proteins"] == 0
+        assert totals["carbs"] == 0
+        assert totals["fats"] == 0
+
+
+class TestUtils:
+    def test_make_unique_filename(self):
+        original_filename = "photo.jpg"
+        unique_filename = make_unique_filename(original_filename)
+        assert unique_filename.endswith(".jpg")
+        assert unique_filename != original_filename
+
+    def test_uploaded_files_to_bytes(self, app):
+        with app.test_request_context():
+            fake_image1 = (io.BytesIO(b"fake image bytes 1"), "photo1.jpg")
+            fake_image2 = (io.BytesIO(b"fake image bytes 2"), "photo2.png")
+
+            uploaded_files = [
+                FileStorage(
+                    stream=fake_image1[0], filename=fake_image1[1], content_type="image/jpeg"
+                ),
+                FileStorage(
+                    stream=fake_image2[0], filename=fake_image2[1], content_type="image/png"
+                ),
+            ]
+
+            image_bytes_list = uploaded_files_to_bytes(uploaded_files)
+            assert len(image_bytes_list) == 2
+            assert (
+                base64.standard_b64decode(image_bytes_list[0].encode("utf-8"))
+                == b"fake image bytes 1"
+            )
+            assert (
+                base64.standard_b64decode(image_bytes_list[1].encode("utf-8"))
+                == b"fake image bytes 2"
+            )
