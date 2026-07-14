@@ -3,6 +3,7 @@
 import os
 from datetime import date, timedelta
 
+from app.llm.estimator import estimate_meal
 from flask import (
     Blueprint,
     abort,
@@ -21,7 +22,7 @@ from app.goals.queries import get_goal_for_date
 from app.meals.forms import MealForm
 from app.meals.queries import get_meals_for_date
 from app.meals.services import compute_totals
-from app.meals.utils import make_unique_filename
+from app.meals.utils import make_unique_filename, uploaded_files_to_bytes
 from app.models import Meal, MealPhoto
 
 meals_bp = Blueprint("meals", __name__, url_prefix="/meals")
@@ -216,18 +217,29 @@ def delete_meal(meal_id: int):
 @meals_bp.route("/estimate_with_ai", methods=["POST"])
 @login_required
 def estimate_with_ai():
+    """Endpoint to estimate meal nutritional content using AI based on description and
+    optional images.
+
+    Returns:
+        Response: A JSON response containing the estimated nutritional content.
+    """
     description = request.form.get("description", "")
     uploaded_files = request.files.getlist("new_photos")
 
-    print(
-        f"Estimating meal with description: {description} and {len(uploaded_files)} uploaded files."
-    )
+    # Convert uploaded files to bytes for AI estimation
+    image_bytes_list = uploaded_files_to_bytes(uploaded_files)
+
+    # Call the AI estimation function
+    response = estimate_meal(description, image_bytes_list)
 
     return jsonify(
         {
-            "calorie_kcal": 0,
-            "protein_g": 0,
-            "carb_g": 0,
-            "fat_g": 0,
+            "calorie_kcal": response.get("calorie_kcal", 0),
+            "protein_g": response.get("protein_g", 0),
+            "carb_g": response.get("carb_g", 0),
+            "fat_g": response.get("fat_g", 0),
+            "meal_summary": response.get("meal_summary", ""),
+            "assumptions": response.get("assumptions", ""),
+            "confidence": response.get("confidence", ""),
         }
     )
