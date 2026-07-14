@@ -1,11 +1,11 @@
 """Application factory module for initializing the Flask app."""
 
 import os
-import random
 
 from flask import Flask
 from flask_login import LoginManager
 
+from app.context_processors import register_context_processors
 from app.db import db, init_db
 from config import config
 
@@ -51,8 +51,6 @@ def create_app(config_name=None):
 
     app.register_blueprint(meals_bp, url_prefix="/meals")
 
-    @app.context_processor
-    def inject_food_icon():
-        return dict(current_food_icon=random.choice(app.config["FOOD_ICONS"]))
+    register_context_processors(app)
 
     return app
