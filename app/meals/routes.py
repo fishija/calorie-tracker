@@ -226,6 +226,9 @@ def estimate_with_ai():
     description = request.form.get("description", "")
     uploaded_files = request.files.getlist("new_photos")
 
+    if not description and not uploaded_files:
+        return jsonify({"error": "Description or at least one image is required."}), 400
+
     # Convert uploaded files to bytes for AI estimation
     image_bytes_list = uploaded_files_to_bytes(uploaded_files)
 
@@ -241,5 +244,6 @@ def estimate_with_ai():
             "meal_summary": response.get("meal_summary", ""),
             "assumptions": response.get("assumptions", ""),
             "confidence": response.get("confidence", ""),
+            "source_type": response.get("source_type", ""),
         }
     )
