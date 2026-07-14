@@ -2,6 +2,7 @@
 
 import os
 
+import anthropic
 from flask import Flask
 from flask_login import LoginManager
 
@@ -22,6 +23,11 @@ def create_app(config_name=None):
     app.config.from_object(config[config_name])
 
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+
+    # create Anthropic client
+    app.extensions["anthropic_client"] = anthropic.Anthropic(
+        api_key=app.config["ANTHROPIC_API_KEY"]
+    )
 
     init_db(app)
 

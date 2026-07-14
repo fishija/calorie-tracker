@@ -19,6 +19,9 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///app.db")
     UPLOAD_FOLDER = Path(__file__).parent / "uploads"
 
+    ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
+    CLAUDE_MODEL = "claude-sonnet-5"
+
 
 class DevelopmentConfig(Config):
     """Development configuration class with settings for local development."""
