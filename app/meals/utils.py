@@ -1,5 +1,6 @@
 """Utility functions for meal-related operations."""
 
+import base64
 import uuid
 
 from werkzeug.utils import secure_filename
@@ -18,3 +19,17 @@ def make_unique_filename(original_filename: str) -> str:
     ext = safe_name.rsplit(".", 1)[-1].lower() if "." in safe_name else ""
     unique_id = uuid.uuid4().hex
     return f"{unique_id}.{ext}" if ext else unique_id
+
+
+def uploaded_files_to_bytes(uploaded_files) -> list[bytes]:
+    """Convert a list of uploaded files to a list of bytes.
+
+    Args:
+        uploaded_files (list): A list of uploaded file objects.
+
+    Returns:
+        list[bytes]: A list of byte representations of the uploaded files.
+    """
+    return [
+        base64.standard_b64encode(file.stream.read()).decode("utf-8") for file in uploaded_files
+    ]
