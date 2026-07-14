@@ -3,7 +3,6 @@
 import os
 from datetime import date, timedelta
 
-from app.llm.estimator import estimate_meal
 from flask import (
     Blueprint,
     abort,
@@ -19,6 +18,7 @@ from flask_login import current_user, login_required
 
 from app.db import db
 from app.goals.queries import get_goal_for_date
+from app.llm.estimator import estimate_meal
 from app.meals.forms import MealForm
 from app.meals.queries import get_meals_for_date
 from app.meals.services import compute_totals
