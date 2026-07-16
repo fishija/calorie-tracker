@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      target: development
+    environment:
+      FLASK_ENV: development
+    command: uv run flask run --host 0.0.0.0 --port 8001 --debug
+    volumes:
+      - .:/app
+      - venv_data:/app/.venv
+      - uploads_data_dev:/app/uploads
+
+volumes:
+  venv_data:
+  uploads_data_dev:
