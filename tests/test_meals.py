@@ -515,8 +515,9 @@ class TestEstimateWithAIRoute:
 
 
 class TestServices:
-    def test_compute_totals(self, make_meal):
-        user_id = 1
+    def test_compute_totals(self, make_user, make_meal):
+        user = make_user()
+        user_id = user.id
         meal1 = make_meal(user_id=user_id, calorie_kcal=300, protein_g=20, carb_g=40, fat_g=10)
         meal2 = make_meal(user_id=user_id, calorie_kcal=600, protein_g=30, carb_g=70, fat_g=20)
 

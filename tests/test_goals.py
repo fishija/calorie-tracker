@@ -30,12 +30,14 @@ def make_goal(db):
 
     def _make_goal(
         user_id,
-        effective_date=date.today(),
+        effective_date=None,
         calorie_kcal=2000,
         protein_g=150,
         carb_g=250,
         fat_g=70,
     ):
+        if effective_date is None:
+            effective_date = date.today()
         goal = Goal(
             user_id=user_id,
             effective_date=effective_date,
