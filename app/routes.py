@@ -1,6 +1,9 @@
 """Routes module for defining application endpoints."""
 
 from flask import Blueprint, jsonify, render_template
+from sqlalchemy import text
+
+from app.db import db
 
 main_bp = Blueprint("main", __name__)
 
@@ -14,4 +17,5 @@ def index():
 @main_bp.route("/health")
 def health():
     """Health check endpoint returning the status of the application."""
+    db.session.execute(text("SELECT 1"))
     return jsonify({"status": "ok"})
