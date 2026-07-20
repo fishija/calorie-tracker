@@ -9,8 +9,7 @@ wheels/
 # Uploaded files
 uploads/
 
-# Migration/db files
-migrations/alembic.ini
+# db files
 *.db
 
 # Virtual environments
