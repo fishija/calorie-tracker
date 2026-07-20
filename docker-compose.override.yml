@@ -4,7 +4,6 @@ services:
       target: development
     environment:
       FLASK_ENV: development
-    command: uv run flask run --host 0.0.0.0 --port 8001 --debug
     volumes:
       - .:/app
       - venv_data:/app/.venv

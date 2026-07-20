@@ -41,6 +41,9 @@ COPY app/ ./app/
 COPY config.py wsgi.py ./
 COPY migrations/ ./migrations/
 
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 8001
 
-CMD ["uv", "run", "--no-dev", "gunicorn", "--bind", "0.0.0.0:8001", "wsgi:app"]
+ENTRYPOINT ["/entrypoint.sh"]

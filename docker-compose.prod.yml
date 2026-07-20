@@ -4,9 +4,6 @@ services:
       target: production
     environment:
       FLASK_ENV: production
-    command: >
-      sh -c "uv run --no-dev flask db upgrade &&
-             uv run --no-dev gunicorn --bind 0.0.0.0:8001 wsgi:app"
     volumes:
       - uploads_data:/app/uploads
 
