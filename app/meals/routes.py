@@ -99,7 +99,7 @@ def add_meal():
 
     try:
         selected_date = date.fromisoformat(date_str)
-    except TypeError, ValueError:
+    except (TypeError, ValueError):
         abort(404, description="Invalid or missing date.")
 
     form = MealForm(logged_date=selected_date)
