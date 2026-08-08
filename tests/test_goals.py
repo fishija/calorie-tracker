@@ -6,6 +6,7 @@ import pytest
 
 from app.goals.forms import GoalForm
 from app.goals.queries import get_goal_for_date, get_todays_goal
+from werkzeug.datastructures import MultiDict
 from app.models import Goal
 
 
@@ -56,14 +57,18 @@ def make_goal(db):
 class TestGoalForm:
     def test_accepts_valid_data(self, app):
         with app.test_request_context():
-            form = GoalForm(
-                data={
-                    "calorie_kcal": 2000,
-                    "protein_g": 150,
-                    "carb_g": 250,
-                    "fat_g": 70,
-                }
-            )
+            simulated_request_data = MultiDict({
+                "calorie_kcal": "2000",
+                "protein_g": "150",
+                "carb_g": "250",
+                "fat_g": "70",
+            })
+            
+            form = GoalForm(formdata=simulated_request_data, meta={'csrf': False})
+            
+            if not form.validate():
+                print(f"Form validation failed with errors: {form.errors}")
+                
             assert form.validate() is True
 
     def test_rejects_negative_values(self, app):
