@@ -2,8 +2,8 @@
 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, FileSize, MultipleFileField
-from wtforms import HiddenField, IntegerField, StringField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired, NumberRange
+from wtforms import HiddenField, DecimalField, StringField, SubmitField, TextAreaField
+from wtforms.validators import DataRequired, InputRequired, NumberRange
 
 
 class MealForm(FlaskForm):
@@ -12,28 +12,46 @@ class MealForm(FlaskForm):
     Attributes:
         logged_date (HiddenField): The date when the meal was logged, stored as a hidden field.
         name (StringField): The name of the meal.
-        calorie_kcal (IntegerField): The caloric content of the meal in kilocalories.
-        protein_g (IntegerField): The protein content of the meal in grams.
-        carb_g (IntegerField): The carbohydrate content of the meal in grams.
-        fat_g (IntegerField): The fat content of the meal in grams.
+        calorie_kcal (DecimalField): The caloric content of the meal in kilocalories.
+        protein_g (DecimalField): The protein content of the meal in grams.
+        carb_g (DecimalField): The carbohydrate content of the meal in grams.
+        fat_g (DecimalField): The fat content of the meal in grams.
         description (TextAreaField): A description of the meal.
         new_photos (MultipleFileField): Field for uploading multiple images of the meal.
         submit (SubmitField): A submit button for the form.
     """
 
-    logged_date = HiddenField(validators=[DataRequired()])
+    logged_date = HiddenField(validators=[InputRequired()])
 
     name = StringField("Name", validators=[DataRequired()])
-    calorie_kcal = IntegerField(
-        "Calories (kcal)", validators=[DataRequired(), NumberRange(min=0, max=10000)]
+    calorie_kcal = DecimalField(
+        "Calories (kcal)", validators=[InputRequired(), NumberRange(min=0, max=10000)],
+        places=1,
+        render_kw={
+            "placeholder": "e.g. 450",
+        }
     )
-    protein_g = IntegerField(
-        "Proteins (g)", validators=[DataRequired(), NumberRange(min=0, max=1000)]
+    protein_g = DecimalField(
+        "Proteins (g)", validators=[InputRequired(), NumberRange(min=0, max=1000)],
+        places=1,
+        render_kw={
+            "placeholder": "e.g. 35",
+        }
     )
-    carb_g = IntegerField(
-        "Carbohydrates (g)", validators=[DataRequired(), NumberRange(min=0, max=1000)]
+    carb_g = DecimalField(
+        "Carbohydrates (g)", validators=[InputRequired(), NumberRange(min=0, max=1000)],
+        places=1,
+        render_kw={
+            "placeholder": "e.g. 40",
+        }
     )
-    fat_g = IntegerField("Fats (g)", validators=[DataRequired(), NumberRange(min=0, max=1000)])
+    fat_g = DecimalField(
+        "Fats (g)", validators=[InputRequired(), NumberRange(min=0, max=1000)],
+        places=1,
+        render_kw={
+            "placeholder": "e.g. 15.5",
+        }
+    )
 
     description = TextAreaField("Description")
     new_photos = MultipleFileField(

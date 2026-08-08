@@ -81,10 +81,10 @@ class Meal(db.Model):
         user_id (int): The foreign key referencing the user.
         logged_date (date): The date when the meal was logged.
         name (str): The name of the meal.
-        calorie_kcal (int): The calorie content of the meal in kilocalories.
-        protein_g (int): The protein content of the meal in grams.
-        carb_g (int): The carbohydrate content of the meal in grams.
-        fat_g (int): The fat content of the meal in grams.
+        calorie_kcal (decimal): The calorie content of the meal in kilocalories.
+        protein_g (decimal): The protein content of the meal in grams.
+        carb_g (decimal): The carbohydrate content of the meal in grams.
+        fat_g (decimal): The fat content of the meal in grams.
         description (str): An optional description of the meal.
         created_at (datetime): The timestamp when the meal was created.
         photos (list[MealPhoto]): A list of associated MealPhoto objects.
@@ -96,10 +96,10 @@ class Meal(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     logged_date = db.Column(db.Date, nullable=False)
     name = db.Column(db.String(255), nullable=False)
-    calorie_kcal = db.Column(db.Integer, nullable=False)
-    protein_g = db.Column(db.Integer, nullable=False)
-    carb_g = db.Column(db.Integer, nullable=False)
-    fat_g = db.Column(db.Integer, nullable=False)
+    calorie_kcal = db.Column(db.Numeric(6, 1), nullable=False)
+    protein_g = db.Column(db.Numeric(6, 1), nullable=False)
+    carb_g = db.Column(db.Numeric(6, 1), nullable=False)
+    fat_g = db.Column(db.Numeric(6, 1), nullable=False)
 
     description = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
