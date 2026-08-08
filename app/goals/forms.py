@@ -7,6 +7,7 @@ from wtforms.validators import InputRequired, NumberRange, StopValidation
 
 class StrictIntegerField(IntegerField):
     """Custom IntegerField that strictly enforces integer input."""
+
     def process_formdata(self, valuelist):
         if valuelist:
             try:
@@ -18,7 +19,7 @@ class StrictIntegerField(IntegerField):
     def pre_validate(self, form):
         """Stop validation on error.
 
-        Prevents "Decimals are not allowed. Please enter a whole number." 
+        Prevents "Decimals are not allowed. Please enter a whole number."
         and "Number must be between 0 and 10000." being displayed at the same time.
         """
         if self.process_errors:
@@ -37,28 +38,32 @@ class GoalForm(FlaskForm):
     """
 
     calorie_kcal = StrictIntegerField(
-        "Calories (kcal)", validators=[InputRequired("This field is required."), NumberRange(min=0, max=10000)],
+        "Calories (kcal)",
+        validators=[InputRequired("This field is required."), NumberRange(min=0, max=10000)],
         render_kw={
             "step": "100",
             "placeholder": "e.g. 2400",
         },
     )
     protein_g = StrictIntegerField(
-        "Proteins (g)", validators=[InputRequired("This field is required."), NumberRange(min=0, max=1000)],
+        "Proteins (g)",
+        validators=[InputRequired("This field is required."), NumberRange(min=0, max=1000)],
         render_kw={
             "placeholder": "e.g. 160",
-        }
+        },
     )
     carb_g = StrictIntegerField(
-        "Carbohydrates (g)", validators=[InputRequired("This field is required."), NumberRange(min=0, max=1000)],
+        "Carbohydrates (g)",
+        validators=[InputRequired("This field is required."), NumberRange(min=0, max=1000)],
         render_kw={
             "placeholder": "e.g. 280",
-        }
+        },
     )
     fat_g = StrictIntegerField(
-        "Fats (g)", validators=[InputRequired("This field is required."), NumberRange(min=0, max=1000)],
+        "Fats (g)",
+        validators=[InputRequired("This field is required."), NumberRange(min=0, max=1000)],
         render_kw={
             "placeholder": "e.g. 70",
-        }
+        },
     )
     submit = SubmitField("Save Goal")

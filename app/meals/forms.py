@@ -2,7 +2,7 @@
 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, FileSize, MultipleFileField
-from wtforms import HiddenField, DecimalField, StringField, SubmitField, TextAreaField
+from wtforms import DecimalField, HiddenField, StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, InputRequired, NumberRange
 
 
@@ -25,32 +25,36 @@ class MealForm(FlaskForm):
 
     name = StringField("Name", validators=[DataRequired()])
     calorie_kcal = DecimalField(
-        "Calories (kcal)", validators=[InputRequired(), NumberRange(min=0, max=10000)],
+        "Calories (kcal)",
+        validators=[InputRequired(), NumberRange(min=0, max=10000)],
         places=1,
         render_kw={
             "placeholder": "e.g. 450",
-        }
+        },
     )
     protein_g = DecimalField(
-        "Proteins (g)", validators=[InputRequired(), NumberRange(min=0, max=1000)],
+        "Proteins (g)",
+        validators=[InputRequired(), NumberRange(min=0, max=1000)],
         places=1,
         render_kw={
             "placeholder": "e.g. 35",
-        }
+        },
     )
     carb_g = DecimalField(
-        "Carbohydrates (g)", validators=[InputRequired(), NumberRange(min=0, max=1000)],
+        "Carbohydrates (g)",
+        validators=[InputRequired(), NumberRange(min=0, max=1000)],
         places=1,
         render_kw={
             "placeholder": "e.g. 40",
-        }
+        },
     )
     fat_g = DecimalField(
-        "Fats (g)", validators=[InputRequired(), NumberRange(min=0, max=1000)],
+        "Fats (g)",
+        validators=[InputRequired(), NumberRange(min=0, max=1000)],
         places=1,
         render_kw={
             "placeholder": "e.g. 15.5",
-        }
+        },
     )
 
     description = TextAreaField("Description")
