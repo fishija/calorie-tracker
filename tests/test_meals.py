@@ -11,6 +11,7 @@ from app.meals.forms import MealForm
 from app.meals.queries import get_meals_for_date
 from app.meals.routes import make_unique_filename, uploaded_files_to_bytes
 from app.meals.services import compute_totals
+from werkzeug.datastructures import MultiDict
 from app.models import Meal
 
 
@@ -66,15 +67,21 @@ def make_meal(db):
 class TestMealForm:
     def test_meal_form_valid_data(self, app):
         with app.test_request_context():
-            form = MealForm(
-                logged_date=date.fromisoformat("2024-06-01"),
-                name="Test Meal",
-                calorie_kcal=500,
-                protein_g=30,
-                carb_g=50,
-                fat_g=20,
-                description="A test meal.",
-            )
+            simulated_request_data = MultiDict({
+                "logged_date": date.fromisoformat("2024-06-01"),
+                "name": "Test Meal",
+                "calorie_kcal": "500",
+                "protein_g": "30",
+                "carb_g": "50",
+                "fat_g": "20",
+                "description": "A test meal.",
+            })
+
+            form = MealForm(formdata=simulated_request_data, meta={'csrf': False})
+
+            if not form.validate():
+                print(f"Form validation failed with errors: {form.errors}")
+
             assert form.validate() is True
 
     def test_meal_form_valid_data_with_photos(self, app):
@@ -84,16 +91,22 @@ class TestMealForm:
                 filename="photo.jpg",
                 content_type="image/jpeg",
             )
-            form = MealForm(
-                logged_date=date.fromisoformat("2024-06-01"),
-                name="Test Meal",
-                calorie_kcal=500,
-                protein_g=30,
-                carb_g=50,
-                fat_g=20,
-                description="A test meal.",
-                new_photos=[fake_image],
-            )
+            simulated_request_data = MultiDict({
+                "logged_date": date.fromisoformat("2024-06-01"),
+                "name": "Test Meal",
+                "calorie_kcal": "500",
+                "protein_g": "30",
+                "carb_g": "50",
+                "fat_g": "20",
+                "description": "A test meal.",
+                "new_photos": [fake_image],
+            })
+
+            form = MealForm(formdata=simulated_request_data, meta={'csrf': False})
+
+            if not form.validate():
+                print(f"Form validation failed with errors: {form.errors}")
+
             assert form.validate() is True
 
     def test_meal_form_invalid_data(self, app):
@@ -149,16 +162,22 @@ class TestMealForm:
                 filename="photo.jpg",
                 content_type="image/jpeg",
             )
-            form = MealForm(
-                logged_date=date.fromisoformat("2024-06-01"),
-                name="Test Meal",
-                calorie_kcal=500,
-                protein_g=30,
-                carb_g=50,
-                fat_g=20,
-                description="A test meal.",
-                new_photos=[fake_image],
-            )
+            simulated_request_data = MultiDict({
+                "logged_date": date.fromisoformat("2024-06-01"),
+                "name": "Test Meal",
+                "calorie_kcal": "500",
+                "protein_g": "30",
+                "carb_g": "50",
+                "fat_g": "20",
+                "description": "A test meal.",
+                "new_photos": [fake_image],
+            })
+
+            form = MealForm(formdata=simulated_request_data, meta={'csrf': False})
+
+            if not form.validate():
+                print(f"Form validation failed with errors: {form.errors}")
+
             assert form.validate() is True
 
 
