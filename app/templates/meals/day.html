@@ -28,7 +28,7 @@
       <div class="mb-3">
         <div class="d-flex justify-content-between small mb-1">
           <span>Calories</span>
-          <span>{{ totals.calories }} / {{ goal.calorie_kcal if goal else "—" }}</span>
+          <span>{{ totals.calories | int }} / {{ goal.calorie_kcal if goal else "—" }}</span>
         </div>
           <div class="progress" role="progressbar" style="height: 8px;">
             {% if goal and goal.calorie_kcal %}
@@ -52,7 +52,7 @@
       <div class="mb-3">
         <div class="d-flex justify-content-between small mb-1">
           <span>Protein</span>
-          <span>{{ totals.proteins }} / {{ goal.protein_g if goal else "—" }}g</span>
+          <span>{{ totals.proteins | int }} / {{ goal.protein_g if goal else "—" }}g</span>
         </div>
         <div class="progress" role="progressbar" style="height: 8px;">
           {% if goal and goal.protein_g %}
@@ -76,7 +76,7 @@
       <div class="mb-3">
         <div class="d-flex justify-content-between small mb-1">
           <span>Carbs</span>
-          <span>{{ totals.carbs }} / {{ goal.carb_g if goal else "—" }}g</span>
+          <span>{{ totals.carbs | int }} / {{ goal.carb_g if goal else "—" }}g</span>
         </div>
         <div class="progress" role="progressbar" style="height: 8px;">
           {% if goal and goal.carb_g %}
@@ -100,7 +100,7 @@
       <div class="mb-0">
         <div class="d-flex justify-content-between small mb-1">
           <span>Fat</span>
-          <span>{{ totals.fats }} / {{ goal.fat_g if goal else "—" }}g</span>
+          <span>{{ totals.fats | int }} / {{ goal.fat_g if goal else "—" }}g</span>
         </div>
         <div class="progress" role="progressbar" style="height: 8px;">
           {% if goal and goal.fat_g %}
