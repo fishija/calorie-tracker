@@ -9,7 +9,7 @@ from app.auth.forms import LoginForm, RegisterForm
 from app.db import db
 from app.models import User
 
-auth_bp = Blueprint("auth", __name__, template_folder="templates")
+auth_bp = Blueprint("auth", __name__, template_folder="templates", url_prefix="/auth")
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])

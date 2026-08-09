@@ -42,20 +42,14 @@ def create_app(config_name=None):
         return db.session.get(User, int(user_id))
 
     from app.auth.routes import auth_bp
-
-    app.register_blueprint(auth_bp, url_prefix="/auth")
-
     from app.routes import main_bp
-
-    app.register_blueprint(main_bp)
-
     from app.goals.routes import goals_bp
-
-    app.register_blueprint(goals_bp, url_prefix="/goals")
-
     from app.meals.routes import meals_bp
 
-    app.register_blueprint(meals_bp, url_prefix="/meals")
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(main_bp)
+    app.register_blueprint(goals_bp)
+    app.register_blueprint(meals_bp)
 
     register_context_processors(app)
 

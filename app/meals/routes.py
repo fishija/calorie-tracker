@@ -25,10 +25,10 @@ from app.meals.services import compute_totals
 from app.meals.utils import make_unique_filename, uploaded_files_to_bytes
 from app.models import Meal, MealPhoto
 
-meals_bp = Blueprint("meals", __name__, url_prefix="/meals")
+meals_bp = Blueprint("meals", __name__)
 
 
-@meals_bp.route("/", methods=["GET"])
+@meals_bp.route("/days/", methods=["GET"])
 @login_required
 def index():
     """Redirect to the current day's meal view."""
@@ -49,7 +49,7 @@ def uploaded_file(filename: str):
     return send_from_directory(current_app.config["UPLOAD_FOLDER"], filename)
 
 
-@meals_bp.route("/day/<date_str>/", methods=["GET", "POST"])
+@meals_bp.route("/days/<date_str>/", methods=["GET", "POST"])
 @login_required
 def day_view(date_str=None):
     """View function for displaying meals logged on a specific date, along with
@@ -77,7 +77,7 @@ def day_view(date_str=None):
     totals = compute_totals(meals)
 
     return render_template(
-        "meals/day.html",
+        "meals/day_view.html",
         selected_date=selected_date,
         prev_date=prev_date,
         next_date=next_date,
@@ -87,20 +87,21 @@ def day_view(date_str=None):
     )
 
 
-@meals_bp.route("/add", methods=["GET", "POST"])
+@meals_bp.route("/days/<date_str>/meals/add", methods=["GET", "POST"])
 @login_required
-def add_meal():
+def add_meal(date_str: str):
     """View function for adding a new meal entry for a specific date.
 
     Returns:
         Response: The response object rendering the add meal template.
     """
-    date_str = request.args.get("date_str")
+    if date_str is None:
+        abort(404, description="Missing date.")
 
     try:
         selected_date = date.fromisoformat(date_str)
-    except TypeError, ValueError:
-        abort(404, description="Invalid or missing date.")
+    except ValueError:
+        abort(404, description="Invalid date format. Use YYYY-MM-DD.")
 
     form = MealForm(logged_date=selected_date)
 
@@ -138,7 +139,7 @@ def add_meal():
     return render_template("meals/add_meal.html", form=form, selected_date=selected_date)
 
 
-@meals_bp.route("/edit/<int:meal_id>", methods=["GET", "POST"])
+@meals_bp.route("/meals/<int:meal_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_meal(meal_id: int):
     """View function for editing an existing meal entry for a specific date.
@@ -189,7 +190,7 @@ def edit_meal(meal_id: int):
     )
 
 
-@meals_bp.route("/delete/<int:meal_id>", methods=["POST"])
+@meals_bp.route("/meals/<int:meal_id>/delete", methods=["POST"])
 @login_required
 def delete_meal(meal_id: int):
     """View function for deleting a meal entry for a specific date.
@@ -214,7 +215,7 @@ def delete_meal(meal_id: int):
     return redirect(url_for("meals.day_view", date_str=selected_date.isoformat()))
 
 
-@meals_bp.route("/estimate_with_ai", methods=["POST"])
+@meals_bp.route("/meals/estimate_with_ai", methods=["POST"])
 @login_required
 def estimate_with_ai():
     """Endpoint to estimate meal nutritional content using AI based on description and
