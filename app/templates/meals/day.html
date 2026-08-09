@@ -30,11 +30,11 @@
           <span>Calories</span>
           <span>{{ totals.calories | int }} / {{ goal.calorie_kcal if goal else "—" }}</span>
         </div>
-          <div class="progress" role="progressbar" style="height: 8px;">
+          <div class="progress macro-progress" role="progressbar">
             {% if goal and goal.calorie_kcal %}
               {% if totals.calories <= goal.calorie_kcal %}
                 <div class="progress-bar bg-success"
-                    style="width: {{ (totals.calories / goal.calorie_kcal * 100) | round(2) }}%">
+                    style="width: {{ (totals.calories / goal.calorie_kcal * 100) | round(2) }}%;">
                 </div>
               {% else %}
                 {% set green_pct = (goal.calorie_kcal / totals.calories * 100) | round(2) %}
@@ -54,7 +54,7 @@
           <span>Protein</span>
           <span>{{ totals.proteins | int }} / {{ goal.protein_g if goal else "—" }}g</span>
         </div>
-        <div class="progress" role="progressbar" style="height: 8px;">
+        <div class="progress macro-progress" role="progressbar">
           {% if goal and goal.protein_g %}
             {% if totals.proteins <= goal.protein_g %}
               <div class="progress-bar bg-success"
@@ -78,7 +78,7 @@
           <span>Carbs</span>
           <span>{{ totals.carbs | int }} / {{ goal.carb_g if goal else "—" }}g</span>
         </div>
-        <div class="progress" role="progressbar" style="height: 8px;">
+        <div class="progress macro-progress" role="progressbar">
           {% if goal and goal.carb_g %}
             {% if totals.carbs <= goal.carb_g %}
               <div class="progress-bar bg-success"
@@ -102,7 +102,7 @@
           <span>Fat</span>
           <span>{{ totals.fats | int }} / {{ goal.fat_g if goal else "—" }}g</span>
         </div>
-        <div class="progress" role="progressbar" style="height: 8px;">
+        <div class="progress macro-progress" role="progressbar">
           {% if goal and goal.fat_g %}
             {% if totals.fats <= goal.fat_g %}
               <div class="progress-bar bg-success"
@@ -124,40 +124,68 @@
   </div>
 
   <!-- Meals list -->
-  <div class="d-flex align-items-center justify-content-between mb-3">
+  <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
     <h2 class="h5 mb-0">Meals today</h2>
-    <a href="{{ url_for('meals.add_meal', date_str=selected_date.isoformat()) }}"
-       class="btn btn-primary btn-sm">+ Add</a>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('meals.add_meal', date_str=selected_date.isoformat()) }}" class="btn">
+        + Add
+      </a>
+    </div>
   </div>
 
   {% if meals %}
-    <div class="list-group">
-      {% for meal in meals %}
-        <div class="list-group-item">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <strong>{{ meal.name }}</strong>
-              {% if meal.description %}
-                <div class="small text-muted">{{ meal.description }}</div>
-              {% endif %}
+  <div class="d-flex flex-column gap-3">
+    {% for meal in meals %}
+      <div class="border rounded-3 p-3 bg-white">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+          <div class="flex-grow-1">
+            <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+              <strong class="fs-6 mb-0">{{ meal.name }}</strong>
             </div>
 
-            <div class="d-flex align-items-center gap-3">
-              <span class="text-nowrap">
-                P:{{ meal.protein_g }}g C:{{ meal.carb_g }}g F:{{ meal.fat_g }}g {{ meal.calorie_kcal }} kcal
+            <div class="d-flex gap-2 flex-wrap">
+              <span class="badge rounded-pill macro-badge">
+                {{ meal.calorie_kcal | round(0) if meal.calorie_kcal % 1 != 0 else meal.calorie_kcal | int }} kcal
               </span>
-              <a href="{{ url_for('meals.edit_meal', meal_id=meal.id) }}" title="Edit">Edit</a>
-              <form method="post" action="{{ url_for('meals.delete_meal', meal_id=meal.id) }}"
-                    onsubmit="return confirm('Delete this meal?');" class="d-inline m-0">
-                    <button type="submit" class="btn btn-link p-0 text-danger" title="Delete"style="background:none;">Delete</button>
-              </form>
+              <span class="badge rounded-pill macro-badge">
+                P {{ meal.protein_g | round(1) if meal.protein_g % 1 != 0 else meal.protein_g | int }}g
+              </span>
+              <span class="badge rounded-pill macro-badge">
+                C {{ meal.carb_g | round(1) if meal.carb_g % 1 != 0 else meal.carb_g | int }}g
+              </span>
+              <span class="badge rounded-pill macro-badge">
+                F {{ meal.fat_g | round(1) if meal.fat_g % 1 != 0 else meal.fat_g | int }}g
+              </span>
             </div>
           </div>
+
+          <div class="d-flex align-items-center gap-2 flex-shrink-0">
+            <a href="{{ url_for('meals.edit_meal', meal_id=meal.id) }}"
+              class="btn btn-muted"
+              title="Edit">
+              Edit
+            </a>
+            <form method="post" action="{{ url_for('meals.delete_meal', meal_id=meal.id) }}"
+                  onsubmit="return confirm('Delete this meal?');" class="m-0">
+              <button type="submit"
+                      class="btn btn-danger-soft"
+                      title="Delete">
+                Delete
+              </button>
+            </form>
+          </div>
         </div>
-      {% endfor %}
-    </div>
+
+        {% if meal.description %}
+          <div class="small text-muted mt-2">
+            {{ meal.description }}
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
   {% else %}
-    <p class="text-muted">No meals logged for this day yet.</p>
+    <p class="text-muted text-center py-4 mb-0">No meals logged for this day yet.</p>
   {% endif %}
 
 </div>

@@ -99,18 +99,57 @@ button, .btn {
     display: inline-block;
     background: var(--accent);
     color: #fff;
-    border: none;
-    padding: 10px 18px;
-    border-radius: var(--radius);
-    font-size: 0.95rem;
+    border: 1px solid var(--accent);
+    padding: 2px 10px;
+    border-radius: 0.375rem;
+    font-size: 0.8rem;
     cursor: pointer;
     text-decoration: none;
 }
-button:hover, .btn:hover { background: var(--accent-hover); }
+button:hover, .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+/* Overwrite the default .btn colors for actions that need a different look */
+.btn-muted {
+    background: #f1f3f5;
+    color: #333;
+    border-color: #dee2e6;
+}
+.btn-muted:hover { background: #e2e6ea; }
+
+.btn-danger-soft {
+    background: #fff0f0;
+    color: #c0392b;
+    border-color: #f1c0c0;
+}
+.btn-danger-soft:hover { background: #ffe1e1; }
+
 .field-error {
     color: var(--danger);
     font-size: 0.82rem;
     margin: -12px 0 12px;
+}
+
+.macro-badge {
+    background: #f1f3f5;
+    color: #333;
+    border: 1px solid #dee2e6;
+    font-weight: 500;
+}
+
+.macro-progress {
+    height: 8px;
+    background-color: #dee2e6;
+}
+
+.meal-photo-thumb {
+    width: 96px;
+}
+.meal-photo-thumb img {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
 }
 .goal-percent-group {
     flex-wrap: nowrap;
