@@ -223,7 +223,7 @@ class TestMealQueries:
 
 class TestMealRoutes:
     def test_index_route_requires_login(self, client):
-        response = client.get("/meals/day/2024-06-01/")
+        response = client.get("/days/2024-06-01/")
         assert response.status_code == 302
 
     def test_index_redirects_to_todays_day_view(self, client, make_user):
@@ -231,12 +231,12 @@ class TestMealRoutes:
         client.post(
             "/auth/login", data={"email_or_username": user.username, "password": "password123"}
         )
-        response = client.get("/meals/", follow_redirects=True)
+        response = client.get("/days/", follow_redirects=True)
         assert response.status_code == 200
-        assert response.request.path == f"/meals/day/{date.today().isoformat()}/"
+        assert response.request.path == f"/days/{date.today().isoformat()}/"
 
     def test_day_view_requires_login(self, client):
-        response = client.get(f"/meals/day/{date.today().isoformat()}/")
+        response = client.get(f"/days/{date.today().isoformat()}/")
         assert response.status_code == 302  # Redirect to login
 
     def test_day_view_displays_meals_and_totals(self, client, make_user, make_meal):
@@ -273,7 +273,7 @@ class TestMealRoutes:
             "fats": 50,
         }
 
-        response = client.get(f"/meals/day/{date.today().isoformat()}/")
+        response = client.get(f"/days/{date.today().isoformat()}/")
         assert response.status_code == 200
 
         # Check that the assumed totals are displayed in the response data
@@ -289,14 +289,13 @@ class TestMealRoutes:
         client.post(
             "/auth/login", data={"email_or_username": user.username, "password": "password123"}
         )
-        response = client.get("/meals/day/invalid-date/")
+        response = client.get("/days/invalid-date/")
         assert response.status_code == 404
-        assert b"Invalid date format" in response.data
 
 
 class TestAddMealRoute:
     def test_add_meal_requires_login(self, client):
-        response = client.get("/meals/add?date_str=2024-06-01")
+        response = client.get("/days/2024-06-01/meals/add")
         assert response.status_code == 302  # Redirect to login
 
     def test_add_meal_invalid_date(self, client, make_user):
@@ -304,9 +303,9 @@ class TestAddMealRoute:
         client.post(
             "/auth/login", data={"email_or_username": user.username, "password": "password123"}
         )
-        response = client.get("/meals/add?date_str=invalid-date")
+        response = client.get("/days/invalid-date/meals/add")
         assert response.status_code == 404
-        assert b"Invalid or missing date" in response.data
+        assert b"Invalid date format." in response.data
 
     def test_add_meal_valid_submission(self, client, make_user):
         user = make_user()
@@ -315,7 +314,7 @@ class TestAddMealRoute:
         )
 
         response = client.post(
-            "/meals/add?date_str=2024-06-01",
+            "/days/2024-06-01/meals/add",
             data={
                 "logged_date": "2024-06-01",
                 "name": "Test Meal",
@@ -340,7 +339,7 @@ class TestAddMealRoute:
         fake_image = (io.BytesIO(b"fake image bytes"), "photo.jpg")
 
         response = client.post(
-            "/meals/add?date_str=2024-06-01",
+            "/days/2024-06-01/meals/add",
             data={
                 "logged_date": "2024-06-01",
                 "name": "Test Meal with Photo",
@@ -364,7 +363,7 @@ class TestAddMealRoute:
         )
 
         response = client.post(
-            "/meals/add?date_str=2024-06-01",
+            "/days/2024-06-01/meals/add",
             data={
                 "logged_date": "2024-06-01",
                 "name": "",  # Missing name
@@ -387,7 +386,7 @@ class TestEditMealRoute:
     def test_edit_meal_requires_login(self, client, make_meal, make_user):
         user = make_user()
         meal = make_meal(user_id=user.id)
-        response = client.get(f"/meals/edit/{meal.id}")
+        response = client.get(f"/meals/{meal.id}/edit")
         assert response.status_code == 302  # Redirect to login
 
     def test_edit_meal_valid_submission(self, client, make_meal, make_user):
@@ -398,7 +397,7 @@ class TestEditMealRoute:
         )
 
         response = client.post(
-            f"/meals/edit/{meal.id}",
+            f"/meals/{meal.id}/edit",
             data={
                 "name": "Updated Meal Name",
                 "calorie_kcal": 700,
@@ -420,7 +419,7 @@ class TestEditMealRoute:
         )
 
         response = client.post(
-            f"/meals/edit/{meal.id}",
+            f"/meals/{meal.id}/edit",
             data={
                 "name": "",  # Missing name
                 "calorie_kcal": -100,  # Invalid negative calories
@@ -445,7 +444,7 @@ class TestEditMealRoute:
             "/auth/login", data={"email_or_username": user2.username, "password": "password123"}
         )
 
-        response = client.get(f"/meals/edit/{meal.id}")
+        response = client.get(f"/meals/{meal.id}/edit")
         assert response.status_code == 404  # User2 should not be able to edit User1's meal
 
 
@@ -453,7 +452,7 @@ class TestDeleteMealRoute:
     def test_delete_meal_requires_login(self, client, make_meal, make_user):
         user = make_user()
         meal = make_meal(user_id=user.id)
-        response = client.post(f"/meals/delete/{meal.id}")
+        response = client.post(f"/meals/{meal.id}/delete")
         assert response.status_code == 302  # Redirect to login
 
     def test_delete_meal_valid(self, client, db, make_meal, make_user):
@@ -463,7 +462,7 @@ class TestDeleteMealRoute:
             "/auth/login", data={"email_or_username": user.username, "password": "password123"}
         )
 
-        response = client.post(f"/meals/delete/{meal.id}", follow_redirects=True)
+        response = client.post(f"/meals/{meal.id}/delete", follow_redirects=True)
         assert response.status_code == 200
         assert db.session.get(Meal, meal.id) is None  # Meal should be deleted
 
@@ -475,7 +474,7 @@ class TestDeleteMealRoute:
             "/auth/login", data={"email_or_username": user2.username, "password": "password123"}
         )
 
-        response = client.post(f"/meals/delete/{meal.id}", follow_redirects=True)
+        response = client.post(f"/meals/{meal.id}/delete", follow_redirects=True)
         assert response.status_code == 404  # User2 should not be able to delete User1's meal
 
 
