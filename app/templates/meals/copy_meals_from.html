@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Copy meals — {{ target_date.strftime("%Y-%m-%d") }}
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex align-items-center gap-2 mb-4">
+    <a class="btn btn-outline-secondary btn-sm"
+       href="{{ url_for('meals.day_view', date_str=target_date.isoformat()) }}">&#9664; Back</a>
+    <h1 class="h5 mb-0">
+      Copy meals to {{ target_date.strftime("%Y-%m-%d") }}
+    </h1>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+
+      <form method="get"
+            action="{{ url_for('meals.copy_meals_from', target_date=target_date.isoformat()) }}"
+            class="mb-4">
+        <div class="mb-0" style="max-width:260px;">
+          <label class="form-label" for="from_date">Copy from date</label>
+          <input type="hidden" name="target_date" value="{{ target_date.isoformat() }}">
+          <input type="date" id="from_date" name="from_date" class="form-control"
+                 value="{{ from_date.isoformat() }}" onchange="this.form.submit()">
+        </div>
+      </form>
+
+      <hr class="my-4">
+
+      <form method="post"
+            action="{{ url_for('meals.copy_meals_from', target_date=target_date.isoformat()) }}"
+            novalidate>
+        {{ form.hidden_tag() }}
+        {{ form.from_date(type="hidden", value=from_date.isoformat()) }}
+
+        {% if meals %}
+          <!-- ADDED NOTE HERE -->
+          <p class="text-muted small mb-3">
+            Select the meals you'd like to copy from {{ from_date.strftime("%Y-%m-%d") }}.<br>
+            <em>Note: Meal images will not be copied.</em>
+          </p>
+
+          <div class="d-flex flex-column gap-2 mb-4">
+            {% for subfield in form.meal_ids %}
+              {% set meal = meals[loop.index0] %}
+              <label class="border rounded-3 p-3 d-flex align-items-start gap-3 mb-0" style="cursor:pointer;">
+                {{ subfield(class="form-check-input mt-1 flex-shrink-0") }}
+                <div class="flex-grow-1">
+                  <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                    <strong class="fs-6 mb-0">{{ meal.name }}</strong>
+                  </div>
+                  <div class="d-flex gap-2 flex-wrap">
+                    <span class="badge rounded-pill macro-badge">
+                      {{ meal.calorie_kcal | round(0) if meal.calorie_kcal % 1 != 0 else meal.calorie_kcal | int }} kcal
+                    </span>
+                    <span class="badge rounded-pill macro-badge">
+                      P {{ meal.protein_g | round(1) if meal.protein_g % 1 != 0 else meal.protein_g | int }}g
+                    </span>
+                    <span class="badge rounded-pill macro-badge">
+                      C {{ meal.carb_g | round(1) if meal.carb_g % 1 != 0 else meal.carb_g | int }}g
+                    </span>
+                    <span class="badge rounded-pill macro-badge">
+                      F {{ meal.fat_g | round(1) if meal.fat_g % 1 != 0 else meal.fat_g | int }}g
+                    </span>
+                  </div>
+                  {% if meal.description %}
+                    <div class="small text-muted mt-2" style="text-align:left;">{{ meal.description }}</div>
+                  {% endif %}
+                </div>
+              </label>
+            {% endfor %}
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <a class="btn btn-outline-secondary"
+               href="{{ url_for('meals.day_view', date_str=target_date.isoformat()) }}">Cancel</a>
+            <button type="submit" class="btn btn-primary">Copy selected</button>
+          </div>
+        {% else %}
+          <p class="text-muted mb-4">No meals found on {{ from_date.strftime("%Y-%m-%d") }}.</p>
+          <div class="d-flex justify-content-end">
+            <a class="btn btn-outline-secondary"
+               href="{{ url_for('meals.day_view', date_str=target_date.isoformat()) }}">Back</a>
+          </div>
+        {% endif %}
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

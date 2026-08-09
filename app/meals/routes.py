@@ -19,7 +19,7 @@ from flask_login import current_user, login_required
 from app.db import db
 from app.goals.queries import get_goal_for_date
 from app.llm.estimator import estimate_meal
-from app.meals.forms import MealForm
+from app.meals.forms import MealForm, CopyMealFromForm
 from app.meals.queries import get_meals_for_date
 from app.meals.services import compute_totals
 from app.meals.utils import make_unique_filename, uploaded_files_to_bytes
@@ -87,6 +87,59 @@ def day_view(date_str=None):
     )
 
 
+@meals_bp.route("/days/<target_date>/meals/copy-from", methods=["GET", "POST"])
+@login_required
+def copy_meals_from(target_date):
+    """View function for copying existing meal entry from another date.
+
+    Returns:
+        Response: The response object redirecting to the day's meal view.
+    """
+    try:
+        target_date = date.fromisoformat(target_date)
+    except TypeError, ValueError:
+        abort(404, description="Invalid or missing date.")
+
+    form = CopyMealFromForm()
+
+    if request.method == "POST":
+        from_date = form.from_date.data or (target_date - timedelta(days=1))
+    else:
+        try:
+            from_date_str = request.args.get("from_date")
+            from_date = date.fromisoformat(from_date_str)
+        except TypeError, ValueError:
+            from_date = target_date - timedelta(days=1)
+        form.from_date.data = from_date
+
+    meals = Meal.query.filter(Meal.user_id == current_user.id, Meal.logged_date == from_date).all()
+
+    form.meal_ids.choices = [(meal.id, meal.name) for meal in meals]
+
+    if form.validate_on_submit():
+        selected_ids = form.meal_ids.data
+        if selected_ids:
+            meals_to_copy = [meal for meal in meals if meal.id in selected_ids]
+            for meal in meals_to_copy:
+                new_meal = Meal(
+                    user_id=current_user.id,
+                    logged_date=target_date,
+                    name=meal.name,
+                    calorie_kcal=meal.calorie_kcal,
+                    protein_g=meal.protein_g,
+                    carb_g=meal.carb_g,
+                    fat_g=meal.fat_g,
+                    description=meal.description,
+                )
+                db.session.add(new_meal)
+                db.session.flush()
+            db.session.commit()
+
+            return redirect(url_for("meals.day_view", date_str=target_date.isoformat()))
+
+    return render_template("meals/copy_meals_from.html", form=form, target_date=target_date, from_date=from_date, meals=meals)
+
+
 @meals_bp.route("/days/<date_str>/meals/add", methods=["GET", "POST"])
 @login_required
 def add_meal(date_str: str):
@@ -127,9 +180,9 @@ def add_meal(date_str: str):
         for photo in form.new_photos.data or []:
             if photo:
                 # Save the photo and create a MealPhoto instance
-                filename = make_unique_filename(photo.filename)
-                photo.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
-                meal_photo = MealPhoto(meal=new_meal, filename=filename)
+                unique_filename = make_unique_filename(photo.filename)
+                photo.save(os.path.join(current_app.config["UPLOAD_FOLDER"], unique_filename))
+                meal_photo = MealPhoto(meal=new_meal, filename=unique_filename)
                 db.session.add(meal_photo)
 
         db.session.add(new_meal)
