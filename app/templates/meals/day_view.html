@@ -127,6 +127,9 @@
   <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
     <h2 class="h5 mb-0">Meals today</h2>
     <div class="d-flex gap-2">
+      <a href="{{ url_for('meals.copy_meals_from', target_date=selected_date.isoformat()) }}" class="btn btn-muted">
+        Copy Meal
+      </a>
       <a href="{{ url_for('meals.add_meal', date_str=selected_date.isoformat()) }}" class="btn">
         + Add
       </a>
@@ -134,56 +137,58 @@
   </div>
 
   {% if meals %}
-  <div class="d-flex flex-column gap-3">
-    {% for meal in meals %}
-      <div class="border rounded-3 p-3 bg-white">
-        <div class="d-flex justify-content-between align-items-start gap-3">
-          <div class="flex-grow-1">
-            <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-              <strong class="fs-6 mb-0">{{ meal.name }}</strong>
+    <div class="d-flex flex-column gap-3">
+      {% for meal in meals %}
+        <div class="border rounded-3 p-3 bg-white">
+          <div class="d-flex justify-content-between align-items-start gap-3">
+            <div class="flex-grow-1">
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <strong class="fs-6 mb-0">{{ meal.name }}</strong>
+              </div>
             </div>
 
-            <div class="d-flex gap-2 flex-wrap">
-              <span class="badge rounded-pill macro-badge">
-                {{ meal.calorie_kcal | round(0) if meal.calorie_kcal % 1 != 0 else meal.calorie_kcal | int }} kcal
-              </span>
-              <span class="badge rounded-pill macro-badge">
-                P {{ meal.protein_g | round(1) if meal.protein_g % 1 != 0 else meal.protein_g | int }}g
-              </span>
-              <span class="badge rounded-pill macro-badge">
-                C {{ meal.carb_g | round(1) if meal.carb_g % 1 != 0 else meal.carb_g | int }}g
-              </span>
-              <span class="badge rounded-pill macro-badge">
-                F {{ meal.fat_g | round(1) if meal.fat_g % 1 != 0 else meal.fat_g | int }}g
-              </span>
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+              <a href="{{ url_for('meals.edit_meal', meal_id=meal.id) }}"
+                class="btn btn-muted"
+                title="Edit">
+                Edit
+              </a>
+              <form method="post" action="{{ url_for('meals.delete_meal', meal_id=meal.id) }}"
+                    onsubmit="return confirm('Delete this meal?');" class="m-0">
+                <button type="submit"
+                        class="btn btn-danger-soft"
+                        title="Delete">
+                  Delete
+                </button>
+              </form>
             </div>
           </div>
 
-          <div class="d-flex align-items-center gap-2 flex-shrink-0">
-            <a href="{{ url_for('meals.edit_meal', meal_id=meal.id) }}"
-              class="btn btn-muted"
-              title="Edit">
-              Edit
-            </a>
-            <form method="post" action="{{ url_for('meals.delete_meal', meal_id=meal.id) }}"
-                  onsubmit="return confirm('Delete this meal?');" class="m-0">
-              <button type="submit"
-                      class="btn btn-danger-soft"
-                      title="Delete">
-                Delete
-              </button>
-            </form>
+          <div class="d-flex gap-2 flex-wrap mt-2">
+            <span class="badge rounded-pill macro-badge">
+              {{ meal.calorie_kcal | round(0) if meal.calorie_kcal % 1 != 0 else meal.calorie_kcal | int }} kcal
+            </span>
+            <span class="badge rounded-pill macro-badge">
+              P {{ meal.protein_g | round(1) if meal.protein_g % 1 != 0 else meal.protein_g | int }}g
+            </span>
+            <span class="badge rounded-pill macro-badge">
+              C {{ meal.carb_g | round(1) if meal.carb_g % 1 != 0 else meal.carb_g | int }}g
+            </span>
+            <span class="badge rounded-pill macro-badge">
+              F {{ meal.fat_g | round(1) if meal.fat_g % 1 != 0 else meal.fat_g | int }}g
+            </span>
           </div>
+
+          <!-- Description -->
+          {% if meal.description %}
+            <div class="small text-muted mt-2">
+              {{ meal.description }}
+            </div>
+          {% endif %}
+          
         </div>
-
-        {% if meal.description %}
-          <div class="small text-muted mt-2">
-            {{ meal.description }}
-          </div>
-        {% endif %}
-      </div>
-    {% endfor %}
-  </div>
+      {% endfor %}
+    </div>
   {% else %}
     <p class="text-muted text-center py-4 mb-0">No meals logged for this day yet.</p>
   {% endif %}
