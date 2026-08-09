@@ -2,15 +2,23 @@
 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, FileSize, MultipleFileField
-from wtforms import DecimalField, HiddenField, StringField, SubmitField, TextAreaField,  DateField, SelectMultipleField
+from wtforms import (
+    DateField,
+    DecimalField,
+    HiddenField,
+    SelectMultipleField,
+    StringField,
+    SubmitField,
+    TextAreaField,
+)
 from wtforms.validators import DataRequired, InputRequired, NumberRange
 from wtforms.widgets import CheckboxInput, ListWidget
 
 
 class CopyMealFromForm(FlaskForm):
-    from_date = DateField('Copy from date', validators=[DataRequired()])
+    from_date = DateField("Copy from date", validators=[DataRequired()])
     meal_ids = SelectMultipleField(
-        'Meals to copy',
+        "Meals to copy",
         coerce=int,
         validators=[DataRequired()],
         widget=ListWidget(prefix_label=False),

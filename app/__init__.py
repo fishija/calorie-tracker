@@ -42,9 +42,9 @@ def create_app(config_name=None):
         return db.session.get(User, int(user_id))
 
     from app.auth.routes import auth_bp
-    from app.routes import main_bp
     from app.goals.routes import goals_bp
     from app.meals.routes import meals_bp
+    from app.routes import main_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)

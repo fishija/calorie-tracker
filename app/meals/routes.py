@@ -19,7 +19,7 @@ from flask_login import current_user, login_required
 from app.db import db
 from app.goals.queries import get_goal_for_date
 from app.llm.estimator import estimate_meal
-from app.meals.forms import MealForm, CopyMealFromForm
+from app.meals.forms import CopyMealFromForm, MealForm
 from app.meals.queries import get_meals_for_date
 from app.meals.services import compute_totals
 from app.meals.utils import make_unique_filename, uploaded_files_to_bytes
@@ -137,7 +137,13 @@ def copy_meals_from(target_date):
 
             return redirect(url_for("meals.day_view", date_str=target_date.isoformat()))
 
-    return render_template("meals/copy_meals_from.html", form=form, target_date=target_date, from_date=from_date, meals=meals)
+    return render_template(
+        "meals/copy_meals_from.html",
+        form=form,
+        target_date=target_date,
+        from_date=from_date,
+        meals=meals,
+    )
 
 
 @meals_bp.route("/days/<date_str>/meals/add", methods=["GET", "POST"])

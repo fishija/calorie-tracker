@@ -364,7 +364,9 @@ class TestMealRoutes:
         assert response.status_code == 200
         assert b"Yesterday Lunch" in response.data
 
-    def test_copy_from_post_copies_selected_meal_to_target_date(self, client, db, make_user, make_meal):
+    def test_copy_from_post_copies_selected_meal_to_target_date(
+        self, client, db, make_user, make_meal
+    ):
         user = make_user()
         meal = make_meal(user_id=user.id, name="Oatmeal", logged_date=date(2024, 6, 1))
         client.post(
