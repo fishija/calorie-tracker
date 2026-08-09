@@ -2,12 +2,26 @@
 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, FileSize, MultipleFileField
-from wtforms import DecimalField, HiddenField, StringField, SubmitField, TextAreaField
+from wtforms import DecimalField, HiddenField, StringField, SubmitField, TextAreaField,  DateField, SelectMultipleField
 from wtforms.validators import DataRequired, InputRequired, NumberRange
+from wtforms.widgets import CheckboxInput, ListWidget
+
+
+class CopyMealFromForm(FlaskForm):
+    from_date = DateField('Copy from date', validators=[DataRequired()])
+    meal_ids = SelectMultipleField(
+        'Meals to copy',
+        coerce=int,
+        validators=[DataRequired()],
+        widget=ListWidget(prefix_label=False),
+        option_widget=CheckboxInput(),
+    )
 
 
 class MealForm(FlaskForm):
     """Form for creating and updating meals with nutritional macros and image uploads.
+
+    No products are associated with this form, and it is intended for quick meal logging.
 
     Attributes:
         logged_date (HiddenField): The date when the meal was logged, stored as a hidden field.
