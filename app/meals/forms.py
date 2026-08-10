@@ -15,12 +15,27 @@ from wtforms.validators import DataRequired, InputRequired, NumberRange
 from wtforms.widgets import CheckboxInput, ListWidget
 
 
-class CopyMealFromForm(FlaskForm):
+class CommaSeparatedListField(StringField):
+    """Custom field to handle comma-separated lists of values."""
+    def process_formdata(self, valuelist):
+        if valuelist and valuelist[0]:
+            # Split by comma and filter out any empty strings
+            self.data = [d.strip() for d in valuelist[0].split(',') if d.strip()]
+        else:
+            self.data = []
+
+
+class CopyMealsForm(FlaskForm):
+    """Form for copying meals from one date to another."""
     from_date = DateField("Copy from date", validators=[DataRequired()])
-    meal_ids = SelectMultipleField(
+    to_dates = CommaSeparatedListField(
+        "Copy to dates",
+        validators=[DataRequired("Please select at least one date.")]
+    )
+    meals = SelectMultipleField(
         "Meals to copy",
         coerce=int,
-        validators=[DataRequired()],
+        validators=[DataRequired("Please select at least one meal to copy.")],
         widget=ListWidget(prefix_label=False),
         option_widget=CheckboxInput(),
     )
