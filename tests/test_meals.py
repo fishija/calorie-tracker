@@ -7,7 +7,7 @@ from datetime import date
 import pytest
 from werkzeug.datastructures import FileStorage, MultiDict
 
-from app.meals.forms import CopyMealFromForm, MealForm
+from app.meals.forms import CopyMealsForm, MealForm
 from app.meals.queries import get_meals_for_date
 from app.meals.routes import make_unique_filename, uploaded_files_to_bytes
 from app.meals.services import compute_totals
@@ -186,45 +186,59 @@ class TestMealForm:
             assert form.validate() is True
 
 
-class TestCopyMealFromForm:
+class TestCopyMealsForm:
     def test_valid_data(self, app):
         with app.test_request_context():
-            form = CopyMealFromForm(
-                formdata=MultiDict({"from_date": "2024-06-01", "meal_ids": "1"}),
+            form = CopyMealsForm(
+                formdata=MultiDict(
+                    {"from_date": "2024-06-01", "to_dates": "2024-06-02", "meals": "1"}
+                ),
                 meta={"csrf": False},
             )
-            form.meal_ids.choices = [(1, "Breakfast")]
+            form.meals.choices = [(1, "Breakfast")]
             assert form.validate() is True
 
     def test_missing_from_date(self, app):
         with app.test_request_context():
-            form = CopyMealFromForm(
-                formdata=MultiDict({"meal_ids": "1"}),
+            form = CopyMealsForm(
+                formdata=MultiDict({"to_dates": "2024-06-02", "meals": "1"}),
                 meta={"csrf": False},
             )
-            form.meal_ids.choices = [(1, "Breakfast")]
+            form.meals.choices = [(1, "Breakfast")]
             assert form.validate() is False
             assert "from_date" in form.errors
 
-    def test_missing_meal_ids(self, app):
+    def test_missing_to_dates(self, app):
         with app.test_request_context():
-            form = CopyMealFromForm(
-                formdata=MultiDict({"from_date": "2024-06-01"}),
+            form = CopyMealsForm(
+                formdata=MultiDict({"from_date": "2024-06-01", "meals": "1"}),
                 meta={"csrf": False},
             )
-            form.meal_ids.choices = [(1, "Breakfast")]
+            form.meals.choices = [(1, "Breakfast")]
             assert form.validate() is False
-            assert "meal_ids" in form.errors
+            assert "to_dates" in form.errors
+
+    def test_missing_meals(self, app):
+        with app.test_request_context():
+            form = CopyMealsForm(
+                formdata=MultiDict({"from_date": "2024-06-01", "to_dates": "2024-06-02"}),
+                meta={"csrf": False},
+            )
+            form.meals.choices = [(1, "Breakfast")]
+            assert form.validate() is False
+            assert "meals" in form.errors
 
     def test_meal_id_not_in_choices_is_rejected(self, app):
         with app.test_request_context():
-            form = CopyMealFromForm(
-                formdata=MultiDict({"from_date": "2024-06-01", "meal_ids": "999"}),
+            form = CopyMealsForm(
+                formdata=MultiDict(
+                    {"from_date": "2024-06-01", "to_dates": "2024-06-02", "meals": "999"}
+                ),
                 meta={"csrf": False},
             )
-            form.meal_ids.choices = [(1, "Breakfast")]
+            form.meals.choices = [(1, "Breakfast")]
             assert form.validate() is False
-            assert "meal_ids" in form.errors
+            assert "meals" in form.errors
 
 
 class TestMealQueries:
@@ -333,16 +347,16 @@ class TestMealRoutes:
         response = client.get("/days/invalid-date/")
         assert response.status_code == 404
 
-    def test_copy_from_requires_login(self, client):
-        response = client.get("/days/2024-06-02/meals/copy-from")
+    def test_copy_meals_requires_login(self, client):
+        response = client.get("/days/2024-06-02/meals/copy")
         assert response.status_code == 302
 
-    def test_copy_from_invalid_target_date(self, client, make_user):
+    def test_copy_meals_invalid_target_date(self, client, make_user):
         user = make_user()
         client.post(
             "/auth/login", data={"email_or_username": user.username, "password": "password123"}
         )
-        response = client.get("/days/invalid-date/meals/copy-from")
+        response = client.get("/days/invalid-date/meals/copy")
         assert response.status_code == 404
 
     def test_copy_from_get_defaults_to_previous_day_with_no_meals(self, client, make_user):
@@ -350,7 +364,7 @@ class TestMealRoutes:
         client.post(
             "/auth/login", data={"email_or_username": user.username, "password": "password123"}
         )
-        response = client.get("/days/2024-06-02/meals/copy-from")
+        response = client.get("/days/2024-06-02/meals/copy")
         assert response.status_code == 200
         assert b"No meals found on 2024-06-01" in response.data
 
@@ -360,7 +374,7 @@ class TestMealRoutes:
         client.post(
             "/auth/login", data={"email_or_username": user.username, "password": "password123"}
         )
-        response = client.get("/days/2024-06-02/meals/copy-from?from_date=2024-06-01")
+        response = client.get("/days/2024-06-02/meals/copy?from_date=2024-06-01")
         assert response.status_code == 200
         assert b"Yesterday Lunch" in response.data
 
@@ -374,8 +388,8 @@ class TestMealRoutes:
         )
 
         response = client.post(
-            "/days/2024-06-02/meals/copy-from",
-            data={"from_date": "2024-06-01", "meal_ids": str(meal.id)},
+            "/days/2024-06-02/meals/copy?mode=from",
+            data={"from_date": "2024-06-01", "to_dates": "2024-06-02", "meals": str(meal.id)},
             follow_redirects=True,
         )
         assert response.status_code == 200
@@ -394,8 +408,8 @@ class TestMealRoutes:
         )
 
         response = client.post(
-            "/days/2024-06-02/meals/copy-from",
-            data={"from_date": "2024-06-01"},
+            "/days/2024-06-02/meals/copy?mode=from",
+            data={"from_date": "2024-06-01", "to_dates": "2024-06-02"},
             follow_redirects=True,
         )
         assert response.status_code == 200
@@ -410,12 +424,38 @@ class TestMealRoutes:
         )
 
         response = client.post(
-            "/days/2024-06-02/meals/copy-from",
-            data={"from_date": "2024-06-01", "meal_ids": str(meal.id)},
+            "/days/2024-06-02/meals/copy?mode=from",
+            data={"from_date": "2024-06-01", "to_dates": "2024-06-02", "meals": str(meal.id)},
             follow_redirects=True,
         )
         assert response.status_code == 200
         assert Meal.query.filter_by(user_id=other.id, logged_date=date(2024, 6, 2)).first() is None
+
+    def test_copy_to_post_copies_selected_meal_to_multiple_target_dates(
+        self, client, db, make_user, make_meal
+    ):
+        user = make_user()
+        meal = make_meal(user_id=user.id, name="Oatmeal", logged_date=date(2024, 6, 1))
+        client.post(
+            "/auth/login", data={"email_or_username": user.username, "password": "password123"}
+        )
+
+        response = client.post(
+            "/days/2024-06-01/meals/copy?mode=to",
+            data={
+                "from_date": "2024-06-01",
+                "to_dates": "2024-06-02,2024-06-03",
+                "meals": str(meal.id),
+            },
+            follow_redirects=True,
+        )
+        assert response.status_code == 200
+        assert response.request.path == "/days/2024-06-01/"
+
+        for target in (date(2024, 6, 2), date(2024, 6, 3)):
+            copied = Meal.query.filter_by(user_id=user.id, logged_date=target).first()
+            assert copied is not None
+            assert copied.name == "Oatmeal"
 
 
 class TestAddMealRoute:
