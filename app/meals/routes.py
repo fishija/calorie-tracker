@@ -19,7 +19,7 @@ from flask_login import current_user, login_required
 from app.db import db
 from app.goals.queries import get_goal_for_date
 from app.llm.estimator import estimate_meal
-from app.meals.forms import CopyMealFromForm, MealForm
+from app.meals.forms import CopyMealsForm, MealForm
 from app.meals.queries import get_meals_for_date
 from app.meals.services import compute_totals
 from app.meals.utils import make_unique_filename, uploaded_files_to_bytes
@@ -62,7 +62,7 @@ def day_view(date_str=None):
         Response: The response object rendering the meal view template.
     """
     if date_str is None:
-        return redirect(url_for("meals.day_view", date_str=date.today().isoformat()))
+        date_str=date.today().isoformat()
 
     try:
         selected_date = date.fromisoformat(date_str)
@@ -87,39 +87,52 @@ def day_view(date_str=None):
     )
 
 
-@meals_bp.route("/days/<target_date>/meals/copy-from", methods=["GET", "POST"])
+@meals_bp.route("/days/<date_str>/meals/copy", methods=["GET", "POST"])
 @login_required
-def copy_meals_from(target_date):
-    """View function for copying existing meal entry from another date.
+def copy_meals(date_str):
+    """View function for copying existing meal entry.
+
+    Two modes are supported:
+    1. Copy from another date to the specified date. (mode = "from")
+    2. Copy from the specified date to one or more other dates. (mode = "to")
+
+    Args:
+        date_str (str): The date string in YYYY-MM-DD format for the target date.
 
     Returns:
         Response: The response object redirecting to the day's meal view.
     """
     try:
-        target_date = date.fromisoformat(target_date)
-    except TypeError, ValueError:
-        abort(404, description="Invalid or missing date.")
+        selected_date = date.fromisoformat(date_str)
+    except ValueError:
+        abort(404, description="Invalid date format. Use YYYY-MM-DD.")
 
-    form = CopyMealFromForm()
+    copy_mode = request.args.get("mode", "from")
 
-    if request.method == "POST":
-        from_date = form.from_date.data or (target_date - timedelta(days=1))
-    else:
-        try:
-            from_date_str = request.args.get("from_date")
-            from_date = date.fromisoformat(from_date_str)
-        except TypeError, ValueError:
-            from_date = target_date - timedelta(days=1)
-        form.from_date.data = from_date
+    form = CopyMealsForm()
+
+    if copy_mode == "from":
+        # Disable the to_dates field when copying from another date
+        form.to_dates.validators = []
+
+        # copy selected meals from the specified date to <date_str>
+        from_date_str = request.args.get("from_date", None)
+        from_date = date.fromisoformat(from_date_str) if from_date_str else selected_date - timedelta(days=1)
+    elif copy_mode == "to":
+        # copy selected meals from <date_str> to the specified dates
+        from_date = selected_date
 
     meals = Meal.query.filter(Meal.user_id == current_user.id, Meal.logged_date == from_date).all()
 
-    form.meal_ids.choices = [(meal.id, meal.name) for meal in meals]
+    form.meals.choices = [(meal.id, meal.name) for meal in meals]
 
     if form.validate_on_submit():
-        selected_ids = form.meal_ids.data
-        if selected_ids:
-            meals_to_copy = [meal for meal in meals if meal.id in selected_ids]
+        to_dates = form.to_dates.data if copy_mode == "to" else [selected_date.isoformat()]
+        selected_meal_ids = form.meals.data
+
+        meals_to_copy = Meal.query.filter(Meal.user_id == current_user.id, Meal.id.in_(selected_meal_ids)).all()
+        for target_date_str in to_dates:
+            target_date = date.fromisoformat(target_date_str)
             for meal in meals_to_copy:
                 new_meal = Meal(
                     user_id=current_user.id,
@@ -133,14 +146,14 @@ def copy_meals_from(target_date):
                 )
                 db.session.add(new_meal)
                 db.session.flush()
-            db.session.commit()
-
-            return redirect(url_for("meals.day_view", date_str=target_date.isoformat()))
+        db.session.commit()
+        return redirect(url_for("meals.day_view", date_str=selected_date.isoformat()))
 
     return render_template(
-        "meals/copy_meals_from.html",
+        "meals/copy_meals.html",
+        mode=copy_mode,
         form=form,
-        target_date=target_date,
+        selected_date=selected_date,
         from_date=from_date,
         meals=meals,
     )
