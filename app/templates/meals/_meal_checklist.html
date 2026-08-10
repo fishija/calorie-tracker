@@ -1,0 +1,33 @@
+<div class="d-flex flex-column gap-2 mb-4">
+  {% for subfield in form.meals %}
+    {% set meal = meals[loop.index0] %}
+    <label class="border rounded-3 p-3 mb-3 d-flex text-body bg-white align-items-start gap-3 mb-0" style="cursor:pointer;">
+      {{ subfield(class="form-check-input mt-1 flex-shrink-0") }}
+      <div class="flex-grow-1">
+        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+          <strong class="fs-6 mb-0">{{ meal.name }}</strong>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <span class="badge rounded-pill macro-badge">
+            {{ meal.calorie_kcal | round(0) if meal.calorie_kcal % 1 != 0 else meal.calorie_kcal | int }} kcal
+          </span>
+          <span class="badge rounded-pill macro-badge">
+            P {{ meal.protein_g | round(1) if meal.protein_g % 1 != 0 else meal.protein_g | int }}g
+          </span>
+          <span class="badge rounded-pill macro-badge">
+            C {{ meal.carb_g | round(1) if meal.carb_g % 1 != 0 else meal.carb_g | int }}g
+          </span>
+          <span class="badge rounded-pill macro-badge">
+            F {{ meal.fat_g | round(1) if meal.fat_g % 1 != 0 else meal.fat_g | int }}g
+          </span>
+        </div>
+        {% if meal.description %}
+          <div class="small text-muted mt-2" style="text-align:left;">{{ meal.description }}</div>
+        {% endif %}
+      </div>
+    </label>
+  {% endfor %}
+  {% if form.meals.errors %}
+    {% for error in form.meals.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+  {% endif %}
+</div>
