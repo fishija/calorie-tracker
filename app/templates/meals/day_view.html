@@ -127,10 +127,10 @@
   <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
     <h2 class="h5 mb-0">Meals today</h2>
     <div class="d-flex gap-2">
-      <a href="{{ url_for('meals.copy_meals_from', target_date=selected_date.isoformat()) }}" class="btn btn-muted">
-        Copy Meal
+      <a href="{{ url_for('meals.copy_meals', date_str=selected_date.isoformat(), mode='from') }}" class="btn btn-muted">
+        Copy Meals
       </a>
-      <a href="{{ url_for('meals.add_meal', date_str=selected_date.isoformat()) }}" class="btn">
+      <a href="{{ url_for('meals.add_meal', date_str=selected_date.isoformat()) }}" class="btn btn-outline-secondary">
         + Add
       </a>
     </div>
