@@ -62,7 +62,7 @@ def day_view(date_str=None):
         Response: The response object rendering the meal view template.
     """
     if date_str is None:
-        date_str=date.today().isoformat()
+        date_str = date.today().isoformat()
 
     try:
         selected_date = date.fromisoformat(date_str)
@@ -117,7 +117,11 @@ def copy_meals(date_str):
 
         # copy selected meals from the specified date to <date_str>
         from_date_str = request.args.get("from_date", None)
-        from_date = date.fromisoformat(from_date_str) if from_date_str else selected_date - timedelta(days=1)
+        from_date = (
+            date.fromisoformat(from_date_str)
+            if from_date_str
+            else selected_date - timedelta(days=1)
+        )
     elif copy_mode == "to":
         # copy selected meals from <date_str> to the specified dates
         from_date = selected_date
@@ -130,7 +134,9 @@ def copy_meals(date_str):
         to_dates = form.to_dates.data if copy_mode == "to" else [selected_date.isoformat()]
         selected_meal_ids = form.meals.data
 
-        meals_to_copy = Meal.query.filter(Meal.user_id == current_user.id, Meal.id.in_(selected_meal_ids)).all()
+        meals_to_copy = Meal.query.filter(
+            Meal.user_id == current_user.id, Meal.id.in_(selected_meal_ids)
+        ).all()
         for target_date_str in to_dates:
             target_date = date.fromisoformat(target_date_str)
             for meal in meals_to_copy:
