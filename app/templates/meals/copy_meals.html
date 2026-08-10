@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Copy meals — {{ selected_date.strftime("%Y-%m-%d") }}
+{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:640px;">
+
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <a class="btn btn-outline-secondary btn-sm"
+       href="{{ url_for('meals.day_view', date_str=selected_date.isoformat()) }}">&#9664; Back</a>
+    <h1 class="h5 mb-0">
+      Copy meals — {{ selected_date.strftime("%Y-%m-%d") }}
+    </h1>
+  </div>
+
+  <div class="copy-mode-toggle mb-4" role="group" aria-label="Copy direction">
+    <a href="{{ url_for('meals.copy_meals', date_str=selected_date.isoformat(), mode='from') }}"
+      class="copy-mode-option {{ 'active' if mode == 'from' else '' }}">
+      From another day
+    </a>
+    <a href="{{ url_for('meals.copy_meals', date_str=selected_date.isoformat(), mode='to') }}"
+      class="copy-mode-option {{ 'active' if mode == 'to' else '' }}">
+      To other days
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+
+      {% if mode == 'from' %}
+        <!-- ================= FROM MODE ================= -->
+        <!-- Pulling meals from another date INTO selected_date -->
+
+        <form method="get"
+              action=""
+              class="mb-4">
+          <input type="hidden" name="mode" value="from">
+          <div class="mb-0" style="max-width:260px;">
+            <label class="form-label" for="from_date">Copy from date</label>
+            <input type="date" id="from_date" name="from_date" class="form-control"
+                   value="{{ from_date.isoformat() }}" onchange="this.form.submit()">
+          </div>
+        </form>
+
+        <hr class="my-4">
+
+        <form method="post"
+              action=""
+              novalidate>
+          {{ form.hidden_tag() }}
+          <input type="hidden" name="mode" value="from">
+          <input type="hidden" name="from_date" value="{{ from_date.isoformat() }}">
+          <input type="hidden" name="to_dates" value="{{ selected_date.isoformat() }}">
+
+          {% if meals %}
+            <p class="text-muted small mb-3">
+              Select the meals you'd like to copy from {{ from_date.strftime("%Y-%m-%d") }} into
+              {{ selected_date.strftime("%Y-%m-%d") }}.<br>
+              <em>Note: Meal images will not be copied.</em>
+            </p>
+
+            {% include "meals/_meal_checklist.html" %}
+
+            <div class="d-flex justify-content-end gap-2 mt-3">
+              <a class="btn btn-outline-secondary"
+                 href="{{ url_for('meals.day_view', date_str=selected_date.isoformat()) }}">Cancel</a>
+              <button type="submit" class="btn btn-secondary" id="from-submit-btn">Copy selected</button>
+            </div>
+          {% else %}
+            <p class="text-muted mb-4">No meals found on {{ from_date.strftime("%Y-%m-%d") }}.</p>
+          {% endif %}
+        </form>
+
+      {% else %}
+        <!-- ================= TO MODE ================= -->
+        <!-- Pushing selected_date's meals OUT to one or more other dates -->
+
+        <form method="post"
+              action=""
+              novalidate id="to-form">
+          {{ form.hidden_tag() }}
+          <input type="hidden" name="mode" value="to">
+          <input type="hidden" name="from_date" value="{{ selected_date.isoformat() }}">
+          <input type="hidden" name="to_dates" id="to_dates_field" value="{{ (form.to_dates.data or []) | join(',') }}">
+
+          {% if meals %}
+            <p class="text-muted small mb-3">
+              Select the meals from {{ selected_date.strftime("%Y-%m-%d") }} you'd like to copy, then choose
+              the days to copy them to.
+            </p>
+
+            {% include "meals/_meal_checklist.html" %}
+
+            <hr class="my-4">
+
+            <label class="form-label fw-semibold">Copy to date(s)</label>
+
+            <!-- Chip list of selected destination dates -->
+            <div id="date_chips" class="d-flex flex-wrap gap-2 mb-3">
+              {% for d in (form.to_dates.data or []) %}
+                <span class="date-chip" data-date="{{ d }}">
+                  {{ d }}
+                  <button type="button" class="btn-close btn-close-chip" aria-label="Remove date" style="font-size:.6rem;"></button>
+                </span>
+              {% endfor %}
+            </div>
+
+            <!-- Add a single date -->
+            <div class="d-flex align-items-end gap-2 mb-3 flex-wrap">
+              <div>
+                <label class="form-label small mb-1" for="add_date">Add a date</label>
+                <input type="date" id="add_date" class="form-control form-control-sm" style="width:170px;">
+              </div>
+              <button type="button" id="add_date_btn" class="btn btn-outline-secondary btn-sm">Add</button>
+            </div>
+
+            <!-- Quick-add a range -->
+            <details class="mb-4">
+              <summary class="small text-muted" style="cursor:pointer;">Add a range of days instead</summary>
+              <div class="d-flex align-items-end gap-2 mt-2 flex-wrap">
+                <div>
+                  <label class="form-label small mb-1" for="range_start">From</label>
+                  <input type="date" id="range_start" class="form-control form-control-sm" style="width:170px;">
+                </div>
+                <div>
+                  <label class="form-label small mb-1" for="range_end">To</label>
+                  <input type="date" id="range_end" class="form-control form-control-sm" style="width:170px;">
+                </div>
+                <button type="button" id="add_range_btn" class="btn btn-outline-secondary btn-sm">Add range</button>
+              </div>
+            </details>
+
+            <p class="small text-muted" id="chip_count_hint">No dates selected yet.</p>
+
+            {% if form.to_dates.errors %}
+              {% for error in form.to_dates.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            {% endif %}
+
+            <div class="d-flex justify-content-end gap-2 mt-3">
+              <a class="btn btn-outline-secondary"
+                 href="{{ url_for('meals.day_view', date_str=selected_date.isoformat()) }}">Cancel</a>
+              <button type="submit" class="btn btn-secondary" id="to-submit-btn">Copy selected</button>
+            </div>
+          {% else %}
+            <p class="text-muted mb-4">No meals found on {{ selected_date.strftime("%Y-%m-%d") }} to copy.</p>
+          {% endif %}
+        </form>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/copy_meals.js') }}"></script>
+{% endblock %}

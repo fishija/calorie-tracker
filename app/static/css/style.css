@@ -106,7 +106,7 @@ button, .btn {
     cursor: pointer;
     text-decoration: none;
 }
-button:hover, .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+button:not(.btn-close):hover, .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
 
 /* Overwrite the default .btn colors for actions that need a different look */
 .btn-muted {
@@ -198,3 +198,45 @@ button:hover, .btn:hover { background: var(--accent-hover); border-color: var(--
     color: var(--muted);
 }
 .form-footer a { color: var(--accent); }
+.copy-mode-toggle {
+  display: flex;
+  gap: 4px;
+  background-color: #eef2ef;
+  border-radius: 10px;
+  padding: 4px;
+}
+.copy-mode-option {
+  flex: 1;
+  text-align: center;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: .9rem;
+  color: #4b6358;
+  text-decoration: none;
+  transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+}
+.copy-mode-option:hover {
+  color: #2f4a3d;
+  background-color: rgba(58, 122, 93, 0.08);
+}
+.copy-mode-option.active {
+  background-color: #3a7a5d;
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .15);
+}
+.copy-mode-option.disabled {
+  opacity: .45;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+.date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 50rem;
+  background: #f8f9fa;
+  color: var(--text);
+}
