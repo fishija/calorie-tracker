@@ -9,7 +9,7 @@ class StrictIntegerField(IntegerField):
     """Custom IntegerField that strictly enforces integer input."""
 
     def process_formdata(self, valuelist):
-        if valuelist:
+        if valuelist and valuelist[0]:
             try:
                 self.data = int(valuelist[0])
             except ValueError:
