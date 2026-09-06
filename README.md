@@ -69,9 +69,3 @@ Requires a running PostgreSQL instance and `POSTGRES_HOST` set accordingly.
 ```bash
 uv run pytest
 ```
-
-## Roadmap
-
-1. **Multi-model comparison** — benchmark multiple LLMs on calorie estimation accuracy
-2. **OFF database + agentic workflow** — LLM agent with tool access to Open Food Facts; user describes a meal naturally, the agent fetches real product data and computes macros
-3. **Agentic vs. naive benchmark** — compare the DB-backed agentic approach against direct LLM estimation
