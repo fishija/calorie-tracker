@@ -2,13 +2,13 @@
 
 from flask import current_app
 
+from app.llm.schemas import MealEstimation
 from app.llm.prompts import ESTIMATE_MEAL_SYSTEM_PROMPT
-from app.llm.tools import NUTRITION_TOOL
 
 
 def estimate_meal(
     description: str, image_bytes_list: list[bytes] | None = None, client=None
-) -> dict:
+) -> MealEstimation:
     """
     Estimate kcal/macros for a meal.
 
@@ -39,21 +39,18 @@ def estimate_meal(
                     },
                 }
             )
+    
+    prompt = ESTIMATE_MEAL_SYSTEM_PROMPT.format(description=description)
 
-    content.append({"type": "text", "text": f"Meal description: {description}"})
-
-    response = client.messages.create(
+    response = client.messages.parse(
         model=model,
-        max_tokens=500,
-        system=ESTIMATE_MEAL_SYSTEM_PROMPT,
-        tools=[NUTRITION_TOOL],
-        tool_choice={"type": "tool", "name": "log_nutrition"},  # force structured output
-        messages=[{"role": "user", "content": content}],
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "user", "content": prompt
+            }
+        ],
+        output_format=MealEstimation
     )
 
-    # Extract the tool call input
-    for block in response.content:
-        if block.type == "tool_use" and block.name == "log_nutrition":
-            return block.input
-
-    raise RuntimeError("Model did not return a tool call — unexpected response format")
+    return response.parsed_output

@@ -312,17 +312,6 @@ def estimate_with_ai():
     image_bytes_list = uploaded_files_to_bytes(uploaded_files)
 
     # Call the AI estimation function
-    response = estimate_meal(description, image_bytes_list)
+    meal_estimation = estimate_meal(description, image_bytes_list)
 
-    return jsonify(
-        {
-            "calorie_kcal": response.get("calorie_kcal", 0),
-            "protein_g": response.get("protein_g", 0),
-            "carb_g": response.get("carb_g", 0),
-            "fat_g": response.get("fat_g", 0),
-            "meal_summary": response.get("meal_summary", ""),
-            "assumptions": response.get("assumptions", ""),
-            "confidence": response.get("confidence", ""),
-            "source_type": response.get("source_type", ""),
-        }
-    )
+    return meal_estimation.model_dump_json()
