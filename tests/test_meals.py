@@ -7,11 +7,11 @@ from datetime import date
 import pytest
 from werkzeug.datastructures import FileStorage, MultiDict
 
+from app.llm.schemas import MealEstimation
 from app.meals.forms import CopyMealsForm, MealForm
 from app.meals.queries import get_meals_for_date
 from app.meals.routes import make_unique_filename, uploaded_files_to_bytes
 from app.meals.services import compute_totals
-from app.llm.schemas import MealEstimation
 from app.models import Meal
 
 

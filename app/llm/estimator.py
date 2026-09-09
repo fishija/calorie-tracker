@@ -2,8 +2,8 @@
 
 from flask import current_app
 
-from app.llm.schemas import MealEstimation
 from app.llm.prompts import ESTIMATE_MEAL_SYSTEM_PROMPT
+from app.llm.schemas import MealEstimation
 
 
 def estimate_meal(
@@ -39,18 +39,14 @@ def estimate_meal(
                     },
                 }
             )
-    
+
     prompt = ESTIMATE_MEAL_SYSTEM_PROMPT.format(description=description)
 
     response = client.messages.parse(
         model=model,
         max_tokens=1024,
-        messages=[
-            {
-                "role": "user", "content": prompt
-            }
-        ],
-        output_format=MealEstimation
+        messages=[{"role": "user", "content": prompt}],
+        output_format=MealEstimation,
     )
 
     return response.parsed_output

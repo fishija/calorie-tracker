@@ -3,8 +3,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from app.llm.schemas import MealEstimation
 from app.llm.estimator import estimate_meal
+from app.llm.schemas import MealEstimation
 
 
 @pytest.fixture
