@@ -5,6 +5,8 @@ for different deployment environments (development, testing, production).
 """
 
 import os
+from enum import Enum
+from pydantic import BaseModel
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -28,6 +30,17 @@ def _build_postgres_uri(db_name):
     return f"postgresql+psycopg://{user}:{password}@{host}/{db_name}"
 
 
+class LLMProvider(str, Enum):
+    ANTHROPIC = "anthropic"
+    GOOGLE = "google"
+
+
+class ModelConfig(BaseModel):
+    provider: LLMProvider
+    api_key: str
+    model_name: str
+
+
 class Config:
     """Base configuration class containing shared settings and constants."""
 
@@ -35,8 +48,12 @@ class Config:
     UPLOAD_FOLDER = Path(__file__).parent / "uploads"
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    ANTHROPIC_API_KEY = _get_secret("ANTHROPIC_API_KEY")
-    CLAUDE_MODEL = "claude-sonnet-5"
+    
+    MODEL_CFG = ModelConfig(
+        provider=LLMProvider.ANTHROPIC,
+        api_key=_get_secret("ANTHROPIC_API_KEY"),
+        model_name="claude-sonnet-5"
+    )
 
 
 class DevelopmentConfig(Config):
