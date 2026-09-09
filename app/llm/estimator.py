@@ -10,11 +10,35 @@ from app.llm.prompts import ESTIMATE_MEAL_SYSTEM_PROMPT
 from app.llm.schemas import MealEstimation
 
 
-def _estimate_gemini(client, model_name: str, description: str, image_bytes_list: list[bytes]) -> MealEstimation:
-    pass
+def _estimate_gemini(client, model_name: str, prompt: str, image_bytes_list: list[bytes]) -> MealEstimation:
+    input = [
+        {"type": "text", "text": prompt},
+    ]
+    
+    if image_bytes_list:
+        for img_data in image_bytes_list:
+            mime_type = "image/jpeg"
+            input.append(
+                {
+                    "type": "image",
+                    "mime_type": mime_type,
+                    "data": img_data,
+                }
+            )
+            
+    interaction = client.interactions.create(
+        model=model_name,
+        input=input,
+        response_format={
+            "type": "text",
+            "mime_type": "application/json",
+            "schema": MealEstimation.model_json_schema()
+        },
+    )
+    return MealEstimation.model_validate_json(interaction.output_text)
 
 
-def _estimate_claude(client, model_name: str, description: str, image_bytes_list: list[bytes]) -> MealEstimation:
+def _estimate_claude(client, model_name: str, prompt: str, image_bytes_list: list[bytes]) -> MealEstimation:
     content = []
     
     if image_bytes_list:
@@ -31,20 +55,17 @@ def _estimate_claude(client, model_name: str, description: str, image_bytes_list
                 }
             )
 
-    prompt = ESTIMATE_MEAL_SYSTEM_PROMPT.format(description=description)
-
     response = client.messages.parse(
         model=model_name,
         max_tokens=1024,
         messages=[{"role": "user", "content": prompt}],
         output_format=MealEstimation,
     )
-
     return response.parsed_output
 
 
 def estimate_meal(
-    description: str, image_bytes_list: list[bytes] | None = None, client=None
+    description: str, image_bytes_list: list[bytes] | None = None
 ) -> MealEstimation:
     """
     Estimate kcal/macros for a meal.
@@ -75,5 +96,7 @@ def estimate_meal(
     else:
         raise ValueError(f"Estimation with LLM provider {provider} is not available.")
     
-    meal_estimation_object = estimate_fn(client, model_name, description, image_bytes_list)
+    prompt = ESTIMATE_MEAL_SYSTEM_PROMPT.format(description=description)
+    
+    meal_estimation_object = estimate_fn(client, model_name, prompt, image_bytes_list)
     return meal_estimation_object
