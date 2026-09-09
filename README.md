@@ -32,7 +32,7 @@ A calorie tracking web app that uses Gemini (with option to use Claude) to estim
 ### Prerequisites
 
 - Docker & Docker Compose
-- An [Anthropic API key](https://console.anthropic.com/)
+- Google Gemini or Anthropic Claude API key
 
 ### Environment Variables
 
