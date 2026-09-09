@@ -11,6 +11,7 @@ from app.meals.forms import CopyMealsForm, MealForm
 from app.meals.queries import get_meals_for_date
 from app.meals.routes import make_unique_filename, uploaded_files_to_bytes
 from app.meals.services import compute_totals
+from app.llm.schemas import MealEstimation
 from app.models import Meal
 
 
@@ -656,16 +657,16 @@ class TestEstimateWithAIRoute:
 
         # Mock the estimate_meal function to return a predictable result
         def mock_estimate_meal(description, image_bytes_list=None, client=None):
-            return {
-                "meal_summary": "Mocked meal summary",
-                "calorie_kcal": 500,
-                "protein_g": 30,
-                "fat_g": 20,
-                "carb_g": 50,
-                "confidence": "high",
-                "assumptions": "Mocked assumptions",
-                "source_type": "text_description",
-            }
+            return MealEstimation(
+                meal_summary="Mocked meal summary",
+                calorie_kcal=500,
+                protein_g=30,
+                fat_g=20,
+                carb_g=50,
+                confidence="high",
+                assumptions="Mocked assumptions",
+                source_type="text_description",
+            )
 
         monkeypatch.setattr("app.meals.routes.estimate_meal", mock_estimate_meal)
 
@@ -675,7 +676,7 @@ class TestEstimateWithAIRoute:
             follow_redirects=True,
         )
         assert response.status_code == 200
-        json_data = response.get_json()
+        json_data = response.get_json(force=True)
         assert json_data["meal_summary"] == "Mocked meal summary"
         assert json_data["calorie_kcal"] == 500
         assert json_data["protein_g"] == 30
