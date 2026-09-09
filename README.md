@@ -46,7 +46,10 @@ Fill in your values in `.env`.
 
 ```bash
 # Development (hot reload)
-docker compose up
+docker compose up -d
+
+# Upgrade database
+docker compose exec app uv run flask db upgrade
 
 # Production
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up
