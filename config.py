@@ -6,10 +6,10 @@ for different deployment environments (development, testing, production).
 
 import os
 from enum import Enum
-from pydantic import BaseModel
 from pathlib import Path
 
 from dotenv import load_dotenv
+from pydantic import BaseModel
 
 load_dotenv()
 
@@ -48,11 +48,11 @@ class Config:
     UPLOAD_FOLDER = Path(__file__).parent / "uploads"
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    
+
     MODEL_CFG = ModelConfig(
         provider=LLMProvider.GOOGLE,
         api_key=_get_secret("GOOGLE_API_KEY"),
-        model_name="gemini-3.8-flash"
+        model_name="gemini-3.8-flash",
     )
 
 

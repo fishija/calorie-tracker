@@ -1,20 +1,21 @@
 """Estimation functions for meal nutritional content."""
 
-from flask import current_app
-
 import anthropic
+from flask import current_app
 from google import genai
 
-from config import ModelConfig, LLMProvider
 from app.llm.prompts import ESTIMATE_MEAL_SYSTEM_PROMPT
 from app.llm.schemas import MealEstimation
+from config import LLMProvider, ModelConfig
 
 
-def _estimate_gemini(client, model_name: str, prompt: str, image_bytes_list: list[bytes]) -> MealEstimation:
+def _estimate_gemini(
+    client, model_name: str, prompt: str, image_bytes_list: list[bytes]
+) -> MealEstimation:
     input = [
         {"type": "text", "text": prompt},
     ]
-    
+
     if image_bytes_list:
         for img_data in image_bytes_list:
             mime_type = "image/jpeg"
@@ -25,22 +26,24 @@ def _estimate_gemini(client, model_name: str, prompt: str, image_bytes_list: lis
                     "data": img_data,
                 }
             )
-            
+
     interaction = client.interactions.create(
         model=model_name,
         input=input,
         response_format={
             "type": "text",
             "mime_type": "application/json",
-            "schema": MealEstimation.model_json_schema()
+            "schema": MealEstimation.model_json_schema(),
         },
     )
     return MealEstimation.model_validate_json(interaction.output_text)
 
 
-def _estimate_claude(client, model_name: str, prompt: str, image_bytes_list: list[bytes]) -> MealEstimation:
+def _estimate_claude(
+    client, model_name: str, prompt: str, image_bytes_list: list[bytes]
+) -> MealEstimation:
     content = []
-    
+
     if image_bytes_list:
         for img_data in image_bytes_list:
             media_type = "image/jpeg"  # default to jpeg, could be improved to detect type
@@ -64,9 +67,7 @@ def _estimate_claude(client, model_name: str, prompt: str, image_bytes_list: lis
     return response.parsed_output
 
 
-def estimate_meal(
-    description: str, image_bytes_list: list[bytes] | None = None
-) -> MealEstimation:
+def estimate_meal(description: str, image_bytes_list: list[bytes] | None = None) -> MealEstimation:
     """
     Estimate kcal/macros for a meal.
 
@@ -80,23 +81,23 @@ def estimate_meal(
         for the estimate.
     """
     model_config: ModelConfig = current_app.config["MODEL_CFG"]
-    
+
     provider: LLMProvider = model_config.provider
     api_key: str = model_config.api_key
     model_name: str = model_config.model_name
-    
+
     if provider == LLMProvider.GOOGLE:
         client = genai.Client(api_key=api_key)
         estimate_fn = _estimate_gemini
-        
+
     elif provider == LLMProvider.ANTHROPIC:
         client = anthropic.Anthropic(api_key=api_key)
         estimate_fn = _estimate_claude
-        
+
     else:
         raise ValueError(f"Estimation with LLM provider {provider} is not available.")
-    
+
     prompt = ESTIMATE_MEAL_SYSTEM_PROMPT.format(description=description)
-    
+
     meal_estimation_object = estimate_fn(client, model_name, prompt, image_bytes_list)
     return meal_estimation_object

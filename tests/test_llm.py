@@ -2,9 +2,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from config import LLMProvider, ModelConfig
 from app.llm.estimator import estimate_meal
 from app.llm.schemas import MealEstimation
+from config import LLMProvider, ModelConfig
 
 
 @pytest.fixture
