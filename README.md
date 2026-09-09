@@ -1,6 +1,6 @@
 # Calorie Tracker
 
-A calorie tracking web app that uses Claude to estimate meal nutrition from text descriptions and photos.
+A calorie tracking web app that uses Gemini (with option to use Claude) to estimate meal nutrition from text descriptions and photos.
 
 ## Features
 
@@ -18,7 +18,7 @@ A calorie tracking web app that uses Claude to estimate meal nutrition from text
 | Language | Python 3.14 |
 | Framework | Flask |
 | Database | PostgreSQL 16 |
-| LLM | Anthropic Claude (Sonnet) |
+| LLM | Google Gemini and Anthropic Claude |
 | ORM | SQLAlchemy + Alembic |
 | Package manager | uv |
 | Containerization | Docker + Docker Compose |
