@@ -50,9 +50,9 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     MODEL_CFG = ModelConfig(
-        provider=LLMProvider.ANTHROPIC,
-        api_key=_get_secret("ANTHROPIC_API_KEY"),
-        model_name="claude-sonnet-5"
+        provider=LLMProvider.GOOGLE,
+        api_key=_get_secret("GOOGLE_API_KEY"),
+        model_name="gemini-3.8-flash"
     )
 
 
