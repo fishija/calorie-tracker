@@ -42,7 +42,16 @@
 
         <hr class="my-4">
 
-        <p class="text-muted small mb-2">Enter the calories and macros for this meal.</p>
+        <!-- AI Estimate Header Row -->
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+          <p class="text-muted small mb-0">Enter the calories and macros for this meal.</p>
+          <button type="button"
+                  id="btn-ai-estimate"
+                  class="btn btn-sm btn-outline-primary"
+                  data-url="{{ url_for('meals.estimate_with_ai') }}">
+            ✨ Estimate with AI
+          </button>
+        </div>
 
         <div class="row">
           <div class="col-6 col-md-3 mb-3">
@@ -98,4 +107,8 @@
   </div>
 
 </div>
+
+{% include "meals/_ai_estimate_modal.html" %}
+
+<script src="{{ url_for('static', filename='js/estimate_with_ai.js') }}"></script>
 {% endblock %}
