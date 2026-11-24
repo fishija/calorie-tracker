@@ -12,7 +12,7 @@ from app.meals.forms import CopyMealsForm, MealForm
 from app.meals.queries import get_meals_for_date
 from app.meals.routes import make_unique_filename, uploaded_files_to_bytes
 from app.meals.services import compute_totals
-from app.models import Meal
+from app.models import Meal, MealPhoto
 
 
 @pytest.fixture
@@ -701,6 +701,51 @@ class TestEstimateWithAIRoute:
         json_data = response.get_json()
         # Since description is missing, the AI might return default values or an error message
         assert "error" in json_data
+
+    def test_estimate_with_ai_includes_only_own_existing_photos(
+        self, client, app, db, make_meal, make_user, monkeypatch, tmp_path
+    ):
+        user = make_user()
+        other_user = make_user(username="other", email="other@example.com")
+        meal = make_meal(user_id=user.id)
+        other_meal = make_meal(user_id=other_user.id)
+
+        app.config["UPLOAD_FOLDER"] = tmp_path
+        (tmp_path / "own.jpg").write_bytes(b"own-photo-bytes")
+        (tmp_path / "other.jpg").write_bytes(b"other-photo-bytes")
+        own_photo = MealPhoto(meal_id=meal.id, filename="own.jpg")
+        other_photo = MealPhoto(meal_id=other_meal.id, filename="other.jpg")
+        db.session.add_all([own_photo, other_photo])
+        db.session.commit()
+
+        captured = {}
+
+        def mock_estimate_meal(description, image_bytes_list=None):
+            captured["images"] = image_bytes_list
+            return MealEstimation(
+                meal_summary="Mocked meal summary",
+                calorie_kcal=500,
+                protein_g=30,
+                fat_g=20,
+                carb_g=50,
+                confidence="high",
+                assumptions="Mocked assumptions",
+                source_type="image",
+            )
+
+        monkeypatch.setattr("app.meals.routes.estimate_meal", mock_estimate_meal)
+
+        client.post(
+            "/auth/login", data={"email_or_username": user.username, "password": "password123"}
+        )
+        response = client.post(
+            "/meals/estimate_with_ai",
+            data={"existing_photo_ids": [str(own_photo.id), str(other_photo.id)]},
+        )
+
+        assert response.status_code == 200
+        expected = base64.standard_b64encode(b"own-photo-bytes").decode("utf-8")
+        assert captured["images"] == [expected]  # Other user's photo must be excluded
 
 
 class TestServices:

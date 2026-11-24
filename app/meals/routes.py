@@ -22,7 +22,7 @@ from app.llm.estimator import estimate_meal
 from app.meals.forms import CopyMealsForm, MealForm
 from app.meals.queries import get_meals_for_date
 from app.meals.services import compute_totals
-from app.meals.utils import make_unique_filename, uploaded_files_to_bytes
+from app.meals.utils import make_unique_filename, stored_files_to_bytes, uploaded_files_to_bytes
 from app.models import Meal, MealPhoto
 
 meals_bp = Blueprint("meals", __name__)
@@ -297,19 +297,36 @@ def delete_meal(meal_id: int):
 @login_required
 def estimate_with_ai():
     """Endpoint to estimate meal nutritional content using AI based on description and
-    optional images.
+    optional images. Existing meal photos can be included by passing their IDs as
+    ``existing_photo_ids``; only photos belonging to the current user are used.
 
     Returns:
         Response: A JSON response containing the estimated nutritional content.
     """
     description = request.form.get("description", "")
     uploaded_files = request.files.getlist("new_photos")
+    existing_photo_ids = [
+        int(photo_id)
+        for photo_id in request.form.getlist("existing_photo_ids")
+        if photo_id.isdigit()
+    ]
 
-    if not description and not uploaded_files:
+    if not description and not uploaded_files and not existing_photo_ids:
         return jsonify({"error": "Description or at least one image is required."}), 400
 
     # Convert uploaded files to bytes for AI estimation
     image_bytes_list = uploaded_files_to_bytes(uploaded_files)
+
+    # Add existing meal photos (ownership enforced via the meal's user_id)
+    if existing_photo_ids:
+        existing_photos = (
+            MealPhoto.query.join(Meal)
+            .filter(MealPhoto.id.in_(existing_photo_ids), Meal.user_id == current_user.id)
+            .all()
+        )
+        image_bytes_list += stored_files_to_bytes(
+            current_app.config["UPLOAD_FOLDER"], [photo.filename for photo in existing_photos]
+        )
 
     # Call the AI estimation function
     meal_estimation = estimate_meal(description, image_bytes_list)
