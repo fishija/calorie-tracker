@@ -17,6 +17,13 @@ document.getElementById('btn-ai-estimate').addEventListener('click', async funct
     }
   }
 
+  // On the edit page, include existing photos that aren't marked for removal
+  document.querySelectorAll('input[name="remove_photos"]').forEach(function(checkbox) {
+    if (!checkbox.checked) {
+      formData.append('existing_photo_ids', checkbox.value);
+    }
+  });
+
   // Disable the button and show a loading state
   const originalText = button.innerHTML;
   button.disabled = true;
